@@ -1,0 +1,28 @@
+{
+	"name": "rubber",
+	"version": "1.0.0",
+	"description": "GameMaker Studio 2 Commandline Compiler; Robots Unethically Building Better Executables Recklessly",
+	"main": "rubber.js",
+	"dependencies": {
+		"colors": "^1.1.2",
+		"fs-copy-file-sync": "^1.0.1",
+		"ohm-js": "^0.14.0",
+		"rimraf": "^2.6.2",
+		"shelljs": "^0.7.8",
+		"uuid": "^3.1.0",
+		"zip-local": "^0.3.4"
+	},
+	"devDependencies": {},
+	"keywords": [
+		"gamemaker",
+		"compiler"
+	],
+	"bin": {
+		"rubber": "./rubber.js"
+	},
+	"scripts": {
+		"scr": "node package.json"
+	},
+	"author": "ImDaveead",
+	"license": "MIT"
+}
