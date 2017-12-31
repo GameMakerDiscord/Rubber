@@ -115,7 +115,11 @@ let project = {
 for (var i = 0; i < build_tree.length; i++) {
 	let build = build_tree[i];
 	if(build.name in BuildList) {
-		BuildList[build.name](project,build.options);
+		try {
+			BuildList[build.name](project,build.options);
+		} catch (e) {
+			console.log(`Error in build ${build.name}`.bold.red+": "+e);
+		}
 	}
 }
 clean(); // dont run; debugging purposes

@@ -22,10 +22,26 @@ DEFAULT_OPTIONS = {
 
 let EXPORT = function(project, options) {
 	options = Object.assign({},DEFAULT_OPTIONS,options);
+	let command = undefined;
+	let export_path = "";
 	if(options.zip) {
-		options.zip = path.resolve(options.zip);
+		command="PackageZip";
+		export_path = path.resolve(options.zip);
+	}
+	if(options.installer) {
+		if(command) throw "Cannot use multiple export types";
+		command="PackageNsis";
+		export_path = path.resolve(options.installer);
+	}
+	if(options.test) {
+		if(command) throw "Cannot use multiple export types";
+		command="Run";
+		export_path = ""
+	}
+
+	if(command) {
 		runtime = makeBuildMeta(project,options,options.zip);
-		shell.exec(`${runtime}\\bin\\igor.exe -options="${project.temp_path}\\build.bff" -- Windows PackageZip`);
+		shell.exec(`${runtime}\\bin\\igor.exe -options="${project.temp_path}\\build.bff" -- Windows ${command}`);
 	}
 }
 function makeSteamOptions(project,options) {
