@@ -6,7 +6,6 @@
 	"dependencies": {
 		"colors": "^1.1.2",
 		"fs-copy-file-sync": "^1.0.1",
-		"ohm-js": "^0.14.0",
 		"rimraf": "^2.6.2",
 		"shelljs": "^0.7.8",
 		"uuid": "^3.1.0",
