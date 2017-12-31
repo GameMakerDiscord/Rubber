@@ -7,7 +7,6 @@ const rimraf = require('rimraf');
 const uuid4 = require('uuid/v4');
 const yy_inherit = require("./utils/yy_inherit.js");
 const preferences_grab = require("./utils/preferences_grab.js");
-//const mkdirs = require("./utils/mkdirs.js"); // this is a sync funciton
 
 
 //Make `build_tree` from command line args
