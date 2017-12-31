@@ -1,7 +1,7 @@
 {
 	"name": "gamemaker-rubber",
 	"version": "1.0.2",
-	"description": "GameMaker Studio 2 Commandline Compiler; Robots Unethically Building Better Executables Recklessly",
+	"description": "GameMaker Studio 2 Build Helper; Robots Unethically Building Better Executables Recklessly",
 	"main": "rubber.js",
 	"dependencies": {
 		"colors": "^1.1.2",
