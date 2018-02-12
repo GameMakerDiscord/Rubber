@@ -5,6 +5,8 @@ This tool is called from the command line, takes in a yyz/yyp and output a zip, 
 
 For now, this only runs on windows, compiling to windows.
 
+Maintained by: ImDaveead
+
 ## Notes
 *I would like some of these untested features to be confirmed to work or fail, so that it can be resolved.*
 
