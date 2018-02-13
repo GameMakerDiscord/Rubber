@@ -1,9 +1,9 @@
 # R.u.b.b.e.r. GameMaker Studio 2 Build Helper
 *Robots Unethically Building ~~Better~~ Executables Recklessly*
 
-This tool is called from the command line, takes in a yyz/yyp and output a zip, installer, or just run the game.
+**Note: Outdated, use [Rubber#](https://github.com/GameMakerDiscord/RubberSharp)**
 
-For now, this only runs on windows, compiling to windows.
+This tool is called from the command line, takes in a yyz/yyp and output a zip, installer, or just run the game. For now, this only runs on windows, compiling to windows.
 
 Maintained by: ImDaveead
 
