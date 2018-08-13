@@ -1,16 +1,17 @@
-# R.u.b.b.e.r. GameMaker Studio 2 Build Helper
-*Robots Unethically Building ~~Better~~ Executables Recklessly*
+# Rubber
+Wrapper for IGOR.exe, aka compile gamemaker projects via command line.
+*"Robots Unethically Building ~~Better~~ Executables Recklessly".
 
-**Note: Outdated, use [Rubber#](https://github.com/GameMakerDiscord/RubberSharp)**
-
-This tool is called from the command line, takes in a yyz/yyp and output a zip, installer, or just run the game. For now, this only runs on windows, compiling to windows.
+This tool is called from the command line, takes in a yyz/yyp and output a zip, installer,
+or just run the game. For now, this only runs on windows, compiling to windows. Alternativly
+there is an api that you can call from javascript.
 
 Maintained by: ImDaveead
 
 ## Notes
-*I would like some of these untested features to be confirmed to work or fail, so that it can be resolved.*
+I would like some of these untested features to be confirmed to work or fail, so that it can be resolved.
 
-- Project using shaders might not work
+- ~~Project using shaders might not work~~ **Works**
 - Using steam is not tested
 - Running on mac not supported.
 - Using configurations not tested
@@ -19,9 +20,9 @@ Maintained by: ImDaveead
 
 You will need installed
 1. GameMaker Studio 2 Desktop (inside default install directory).
-1. Node JS with npm.
+1. Node.js with npm installed.
 
-To setup rubber, run `npm install -g gamemaker-rubber`, and you should be all good.
+To install rubber globally, run `npm install -g gamemaker-rubber`, and you should be all good.
 
 ## Usage
 `rubber <project_path> platform <platform options>` Basic Usage
