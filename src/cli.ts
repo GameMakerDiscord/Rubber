@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as cli from "cli";
 import { default as chalk } from "chalk";
 import { readFileSync, existsSync, statSync, readdirSync, PathLike } from "fs";
