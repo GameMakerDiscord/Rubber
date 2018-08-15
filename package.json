@@ -1,23 +1,25 @@
 {
 	"name": "gamemaker-rubber",
-	"version": "1.1.0",
-	"description": "GameMaker Studio 2 Build Helper; Robots Unethically Building Better Executables Recklessly",
-	"main": "rubber.js",
+	"version": "2.0.0",
+	"description": "",
+	"main": "out/rubber.js",
 	"dependencies": {
-		"colors": "^1.1.2",
-		"fs-copy-file-sync": "^1.0.1",
-		"rimraf": "^2.6.2",
-		"shelljs": "^0.7.8",
-		"uuid": "^3.1.0",
-		"zip-local": "^0.3.4"
+		"chalk": "^2.4.1",
+		"cli": "^1.0.1",
+		"fs-extra": "^7.0.0"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"@types/chalk": "^2.2.0",
+		"@types/cli": "^0.11.19",
+		"@types/fs-extra": "^5.0.4",
+		"@types/node": "^10.5.8"
+	},
 	"keywords": [
 		"gamemaker",
 		"compiler"
 	],
 	"bin": {
-		"rubber": "./cli.js"
+		"rubber": "./out/cli.js"
 	},
 	"scripts": {
 		"scr": "node package.json"

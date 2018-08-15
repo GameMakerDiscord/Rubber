@@ -1,6 +1,5 @@
 # Rubber
 Wrapper for IGOR.exe, aka compile gamemaker projects via command line.
-*"Robots Unethically Building ~~Better~~ Executables Recklessly".
 
 This tool is called from the command line, takes in a yyz/yyp and output a zip, installer,
 or just run the game. For now, this only runs on windows, compiling to windows. Alternativly
@@ -22,22 +21,24 @@ You will need installed
 1. GameMaker Studio 2 Desktop (inside default install directory).
 1. Node.js with npm installed.
 
-To install rubber globally, run `npm install -g gamemaker-rubber`, and you should be all good.
+To install rubber globally, run `npm i -g gamemaker-rubber`, and you should be all good.
+
+To use rubber as a dependency, you would use `npm i gamemaker-rubber`
 
 ## Usage
-`rubber <project_path> platform <platform options>` Basic Usage
+`rubber [options] path/to/project.yyp [output file]`
 
-`rubber <project_path> windows -zip windows.zip` Simple Compile For Windows VM
-`rubber <project_path> windows -yyc -zip windows.zip` Simple Compile For Windows YYC
-`rubber <project_path> windows -test` Equivilent to pressing the play button
+**Options**:
+  -Z, --zip              Creates a zip archive
+  -I, --installer        Creates a installer package
+  -y, --yyc              Compiles with YYC
+  -c, --config STRING    Sets the configuration
+  -v, --version          Display the current version
+  -h, --help             Display help and usage details
 
-### All Windows Options
-- `-verbose` Enables IGOR Verbose
-- `-yyc` Complies using YYC instead of VM
-- `-debug` Enables debug mode
-- `-config <name>` Changes the config (default 'default')
-
-You can only set one of these
-- `-zip <filename>` Set export type to Zipfile and set the output path
-- `-installer <filename>` Set export type to Nsis Installer and set the output path
-- `-test` Set export type to zipfile and set the output path
+## Examples
+- `rubber project_folder` Launch the yyp file in `%cd%/project_folder` as if you pressed F5 in gamemaker
+- `rubber .` Launch the yyp file in the current folder as if you pressed F5 in gamemaker
+- `rubber --yyc --zip .` Compile the yyp file in the current folder to a zip file with yyc
+- `rubber --yyc --zip project.yyp` Compile `%cd%/project.yyp` in the current folder to a zip file with yyc
+- `rubber --yyc -I project.yyp` Compile `%cd%/project.yyp` in the current folder to an installer with yyc

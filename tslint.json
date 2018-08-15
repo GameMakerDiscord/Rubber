@@ -1,0 +1,12 @@
+{
+    "defaultSeverity": "warn",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "object-literal-shorthand": false,
+        "object-literal-sort-keys": false,
+    },
+    "rulesDirectory": []
+}

@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "es2015",
+            "es2016"
+        ],
+        "strict": true,
+        "outDir": "out",
+        "module": "commonjs",
+        "target": "esnext"
+    }
+}
