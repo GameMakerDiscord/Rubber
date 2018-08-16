@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 2.0.2 - 2018-08-16
+- Added type declarations so you can import rubber with typescript
+
 ## 2.0.2 - 2018-08-15
 - Remove a test project that got accidentally published
 
