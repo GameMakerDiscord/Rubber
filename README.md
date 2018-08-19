@@ -3,7 +3,9 @@ Wrapper for IGOR.exe, aka compile gamemaker projects via command line.
 
 This tool is called from the command line, takes in a yyz/yyp and output a zip, installer,
 or just run the game. For now, this only runs on windows, compiling to windows. Alternativly
-there is an api that you can call from javascript.
+there is an api that you can call from javascript. Running this program requires that you have
+a valid GameMaker Studio 2 installation and have purchased the selected module (you cannot compile
+to Windows if you only own HTML Exporting)
 
 Maintained by: ImDaveead
 
@@ -18,7 +20,7 @@ I would like some of these untested features to be confirmed to work or fail, so
 ## Setup
 
 You will need installed
-1. GameMaker Studio 2 Desktop (inside default install directory).
+1. GameMaker Studio 2 Desktop (inside it's default install directory).
 1. Node.js with npm installed.
 
 To install rubber globally, run `npm i -g gamemaker-rubber`, and you should be all good.

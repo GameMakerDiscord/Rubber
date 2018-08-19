@@ -3,7 +3,7 @@ import { dirname, join, resolve, basename, extname } from "path";
 import { getUserDir, readLocalSetting } from "./utils/preferences_grab";
 import { inheritYYFile } from "./utils/yy_inherit";
 import { spawn } from "child_process";
-import { RubberEventEmitter, IGameClosedStats } from "./rubber-events";
+import { RubberEventEmitter } from "./rubber-events";
 import { IRuntimeIndex, IBuildMeta, IBuildSteamOptions, IBuildPreferences, IBuildTargetOptions } from "./build-typings";
 import { EventEmitter } from "events";
 
@@ -46,6 +46,8 @@ export interface IRubberOptions {
 export function windows(options: IRubberOptions) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
+    const component = "Windows";
+    const componentBuild = "Windows.build_module";
     const asyncRun = async() => {
         if (tempFolder === undefined || appdataFolder === undefined) {
             throw new Error("%temp% or %appdata% is missing in the environment variables. Error Code Rubber01");
@@ -67,6 +69,7 @@ export function windows(options: IRubberOptions) {
         const projectDir = dirname(projectFile);
         const projectName = basename(projectFile).substring(0, basename(projectFile).length - extname(projectFile).length);
         let runtimeLocation = "";
+        
         if (options.runtimeLocation) {
             runtimeLocation = options.runtimeLocation;
         } else {
@@ -89,10 +92,15 @@ export function windows(options: IRubberOptions) {
             } else {
                 throw new Error("Cannot Locate GameMaker Studio 2 Runtimes. Error Code Rubber02");
             }
-    
         }
         const userDir = await getUserDir();
-    
+        const licensePlist = (await fse.readFile(join(userDir, "licence.plist"))).toString();
+        const allowedComponents = (licensePlist.match(/<key>components<\/key>.*?\n.*?<string>(.*?)<\/string>/) as any)[1].split(";");
+
+        if (!allowedComponents.includes(componentBuild)) {
+            throw new Error("LicenseError: The current profile does not own building of " + component);
+        }
+
         /*
             * My method of setting up IGOR runs as follows:
             * 1. Create 3 Folders replicating the IDE's Cache, Temp, and Output folders.
@@ -235,10 +243,12 @@ export function windows(options: IRubberOptions) {
             join(buildTempPath, "GMCache/MainOptions.json"));
 
         // g
+        // Issue #1: This will fail if options/windows/options_windows.yy does not exist.
         await fse.copy(join(projectDir, "options/windows/options_windows.yy"), join(buildTempPath, "GMCache/PlatformOptions.json"));
 
         emitter.emit("compileStatus", "Running IGOR\n");
-        const igorArgs = ["-options=" + join(buildTempPath, "build.bff"), "--", "Windows", "Run"];
+        const exportType = options.build == "test" ? "Run" : (options.build === "zip" ? "PackageZip" : "PackageNsis")
+        const igorArgs = ["-options=" + join(buildTempPath, "build.bff"), "--", "Windows", exportType];
         const igor = spawn(join(runtimeLocation, "bin", "Igor.exe"), igorArgs);
     
         const lanchingGame = options.build == "test";
@@ -267,12 +277,17 @@ export function windows(options: IRubberOptions) {
             }
         });
     
-        igor.on('close', (code) => {
+        igor.on('close', async(code) => {
             if (!lanchingGame) {
                 emitter.emit("compileFinished");
             } else {
                 emitter.emit("gameFinished");
             }
+            if (code !== 0) {
+                throw new Error("IGOR Failed. Check compile log");
+            }
+            await fse.remove(buildTempPath);
+
             emitter.emit("allFinished");
         });
     }
