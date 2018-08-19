@@ -30,13 +30,16 @@ To use rubber as a dependency, you would use `npm i gamemaker-rubber`
 ## Usage
 `rubber [options] path/to/project.yyp [output file]`
 
-**Options**:
-  -Z, --zip              Creates a zip archive
-  -I, --installer        Creates a installer package
-  -y, --yyc              Compiles with YYC
-  -c, --config STRING    Sets the configuration
-  -v, --version          Display the current version
-  -h, --help             Display help and usage details
+**Options**
+
+| Option          | Actions                        |
+| --------------- | ------------------------------ |
+| -Z, --zip       | Creates a zip archive          |
+| -I, --installer | Creates a installer package    |
+| -y, --yyc       | Compiles with YYC              |
+| -v, --version   | Display the current version    |
+| -c, --config    | Sets the configuration         |
+| -h, --help      | Display help and usage details |
 
 ## Examples
 - `rubber project_folder` Launch the yyp file in `%cd%/project_folder` as if you pressed F5 in gamemaker
