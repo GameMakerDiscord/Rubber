@@ -1,6 +1,6 @@
 {
 	"name": "gamemaker-rubber",
-	"version": "2.0.4",
+	"version": "2.0.5",
 	"description": "",
 	"main": "out/rubber.js",
 	"dependencies": {
@@ -25,5 +25,14 @@
 		"scr": "node package.json"
 	},
 	"author": "ImDaveead",
+	"homepage": "https://github.com/GameMakerDiscord/Rubber#readme",
+	"bugs": {
+		"url": "https://github.com/GameMakerDiscord/Rubber/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/GameMakerDiscord/Rubber"
+	},
+	"readme": "README.md",
 	"license": "MIT"
 }

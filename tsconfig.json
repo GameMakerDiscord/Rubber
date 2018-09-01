@@ -7,7 +7,7 @@
         "strict": true,
         "outDir": "out",
         "module": "commonjs",
-        "target": "esnext",
+        "target": "es5",
         "declaration": true
     }
 }
