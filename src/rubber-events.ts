@@ -1,4 +1,5 @@
-// This file handles the typings for the custom event emitter typings for rubber.
+// This file handles the typings for the
+// custom event emitter typings for rubber.
 import { EventEmitter } from "events";
 
 interface TypedMsg<Name, Args extends Function> {

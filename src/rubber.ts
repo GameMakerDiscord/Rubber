@@ -1,3 +1,5 @@
+// Allows you to compile a GameMaker Project
+// on the windows platform.
 import * as fse from "fs-extra";
 import { dirname, join, resolve, basename, extname } from "path";
 import { getUserDir, readLocalSetting } from "./utils/preferences_grab";
@@ -46,9 +48,13 @@ export interface IRubberOptions {
 export function windows(options: IRubberOptions) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
+    // Build component for checking later.
     const component = "Windows";
     const componentBuild = "Windows.build_module";
+    // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
+        //#region Get Project Data
+        // Make sure some envirionment variables are set.
         if (tempFolder === undefined || appdataFolder === undefined) {
             throw new Error("%temp% or %appdata% is missing in the environment variables. Error Code Rubber01");
         }
@@ -64,12 +70,15 @@ export function windows(options: IRubberOptions) {
             options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2";
         }
         
+        // Compile process starts now, emit the starting event.
         emitter.emit("compileStatus", "Starting Rubber\n");
+        // !!! #6 check if this exists
         const buildTempPath = join(tempFolder, "rubber-build-" + Math.round(Math.random() * 99999));
+        // Get some project path data.
         const projectDir = dirname(projectFile);
         const projectName = basename(projectFile).substring(0, basename(projectFile).length - extname(projectFile).length);
-        let runtimeLocation = "";
         
+        let runtimeLocation = "";
         if (options.runtimeLocation) {
             runtimeLocation = options.runtimeLocation;
         } else {
@@ -93,6 +102,7 @@ export function windows(options: IRubberOptions) {
                 throw new Error("Cannot Locate GameMaker Studio 2 Runtimes. Error Code Rubber02");
             }
         }
+
         const userDir = await getUserDir();
         const licensePlist = (await fse.readFile(join(userDir, "licence.plist"))).toString();
         const allowedComponents = (licensePlist.match(/<key>components<\/key>.*?\n.*?<string>(.*?)<\/string>/) as any)[1].split(";");
@@ -100,7 +110,11 @@ export function windows(options: IRubberOptions) {
         if (!allowedComponents.includes(componentBuild)) {
             throw new Error("LicenseError: The current profile does not own building of " + component);
         }
+        //#endregion
 
+        // Now we got all the data about the project, runtimes, now to actually run IGOR
+
+        //#region Setup and run IGOR.
         /*
             * My method of setting up IGOR runs as follows:
             * 1. Create 3 Folders replicating the IDE's Cache, Temp, and Output folders.
@@ -243,7 +257,7 @@ export function windows(options: IRubberOptions) {
             join(buildTempPath, "GMCache/MainOptions.json"));
 
         // g
-        // Issue #1: This will fail if options/windows/options_windows.yy does not exist.
+        // !!! #1: This will fail if options/windows/options_windows.yy does not exist.
         await fse.copy(join(projectDir, "options/windows/options_windows.yy"), join(buildTempPath, "GMCache/PlatformOptions.json"));
 
         emitter.emit("compileStatus", "Running IGOR\n");
@@ -290,10 +304,13 @@ export function windows(options: IRubberOptions) {
 
             emitter.emit("allFinished");
         });
+        //#endregion
     }
-    // Run later
+    // Run the async function later
+    // This ensures that event handlers are registered.
     setTimeout(() => {
         asyncRun().catch(error => {
+            // throw inside async function ==> emit error
             emitter.emit("error", error)
         });
     }, 0);

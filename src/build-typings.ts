@@ -1,3 +1,5 @@
+// Handles typing for build files
+
 export interface IRuntimeIndex {
     /** Current active runtime version selected in the IDE */
     active: string;
@@ -54,11 +56,50 @@ export interface IBuildSteamOptions {
     steamsdk_path: string;
 }
 export interface IBuildPreferences {
-    /** Taken from local_settings.json, unused by IGOR */
+    /** Taken from local_settings.json, unused by IGOR? */
     default_packaging_choice: number;
     /** Location of Visual Studio's vcvars32.bat */
     visual_studio_path: string;
 }
 export interface IBuildTargetOptions {
     runtime: "VM" | "YYC";
+}
+// not 100% accurate but whatever.
+export interface IWindowsOptions {
+    id: string,
+    modelName: "GMWindowsOptions",
+    mvc: "1.0",
+    name: "Windows",
+    option_windows_allow_fullscreen_switching: boolean,
+    option_windows_borderless: boolean,
+    option_windows_company_info: string,
+    option_windows_copy_exe_to_dest: boolean,
+    option_windows_copyright_info: string,
+    option_windows_description_info: string,
+    option_windows_display_cursor: boolean,
+    option_windows_display_name: string,
+    option_windows_enable_steam: false,
+    option_windows_executable_name: string,
+    option_windows_icon: string,
+    option_windows_installer_finished: string,
+    option_windows_installer_header: string,
+    option_windows_interpolate_pixels: false,
+    option_windows_license: string,
+    option_windows_nsis_file: string,
+    option_windows_product_info: string,
+    option_windows_resize_window: boolean,
+    option_windows_save_location: number,
+    option_windows_scale: number,
+    option_windows_sleep_margin: number,
+    option_windows_splash_screen: string,
+    option_windows_start_fullscreen: boolean,
+    option_windows_texture_page: string,
+    option_windows_use_splash: false,
+    option_windows_version: {
+        build: number,
+        major: number,
+        minor: number,
+        revision: number
+    },
+    option_windows_vsync: boolean
 }

@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// Wrapper for rubber as a CLI
+// Has almost the same functionality as
+// using it from JS, besides the ability
+// to process output.
 import * as cli from "cli";
 import { default as chalk } from "chalk";
 import { readFileSync, existsSync, statSync, readdirSync, PathLike } from "fs";
@@ -23,6 +27,7 @@ function validateYYP(path: PathLike) {
         (projectRead.modelName === "GMProject");
 }
 
+// Prepare CLI Options.
 const options = cli.parse({
     zip: ["Z", "Creates a zip archive"],
     installer: ["I", "Creates a installer package"],
@@ -30,6 +35,7 @@ const options = cli.parse({
     config: ["c", "Sets the configuration", "string"],
     version: ["v", "Display the current version"],
 });
+// CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
     if (options.version) {
         // Output version and if build tools are all set.
@@ -41,6 +47,8 @@ cli.main((args, options) => {
         cli.fatal("Missing project path. Exiting");
     }
     let path = resolve(args[0]);
+    // !!! #4 Removed the yyz check from an older verison. This can
+    //        be fixed by adding it again, extracting it somewhere temporary.
     if (statSync(path).isDirectory()) {
         // Check inside the directory
         for (const name of readdirSync(path)) {
@@ -67,7 +75,7 @@ cli.main((args, options) => {
     let buildType: "test" | "zip" | "installer" = "test";
     if (options.zip && options.installer) {
         // why did you even?
-        cli.fatal("Cannot make a zip and installer :). Use two different cli calls. Exiting")
+        cli.fatal("Cannot make a zip and installer :)   Use two different cli calls. Exiting")
     }
     if (options.zip) {
         buildType = "zip";
@@ -75,6 +83,7 @@ cli.main((args, options) => {
     if (options.installer) {
         buildType = "installer";
     }
+    // Use the api to compile the project.
     const build = rubber.windows({
         projectPath: path,
         build: buildType,
@@ -90,7 +99,7 @@ cli.main((args, options) => {
         process.stdout.write(data);
     });
     build.on("gameStarted", () => {
-        // space it out a bit
+        // space out the compile log and the game log a bit.
         console.log("\n");
     });
     build.on("allFinished", () => {

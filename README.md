@@ -47,3 +47,57 @@ To use rubber as a dependency, you would use `npm i gamemaker-rubber`
 - `rubber --yyc --zip .` Compile the yyp file in the current folder to a zip file with yyc
 - `rubber --yyc --zip project.yyp` Compile `%cd%/project.yyp` in the current folder to a zip file with yyc
 - `rubber --yyc -I project.yyp` Compile `%cd%/project.yyp` in the current folder to an installer with yyc
+
+
+## Nodejs API Usage
+To use Rubber as a dependency, install it to your project with `npm i gamemaker-rubber`, it includes
+type definitions.
+
+### Basic Compile
+```js
+const build = rubber.windows({
+    projectPath: "path/to/game.yyp",
+    build: "run"
+});
+build.on("compileStatus", (data) => {
+    process.stdout.write(data);
+});
+build.on("gameStatus", (data) => {
+    process.stdout.write(data);
+});
+build.on("allFinished", () => {
+    console.log("Compile Finished");
+});
+```
+Rubber uses an asyncronous EventEmitter to give out status updates, so you can listen to certain
+events, but not others, and use it to stream the entire output of IGOR (the compiler) to somewhere
+like the standard output (shown above).
+
+### Events
+#### compileStarted
+Emitted when the compile process starts
+
+#### compileFinished
+Emitted when the **compile process is finished, the game might be launched at this point**.
+
+#### compileStatus
+Emitted with a `data` paramater, containing a string of output data. When displaying this data
+do not manually add a newline (console.log does it)
+
+#### gameStarted
+Emitted when the game starts, not always emitted.
+
+#### gameStatus
+Emitted with a `data` paramater, containing a string of output data from the game process.
+
+#### gameFinished
+Emitted when the game closes, not always emitted.
+
+#### allFinished
+Emitted when everything is finished, always emitted at the end.
+
+#### rawStdout
+Emitted with a `data` paramater, containing a chunk of raw output data from IGOR.
+
+#### error
+Emitted when some kind of error happens.
