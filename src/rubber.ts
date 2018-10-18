@@ -258,7 +258,13 @@ export function windows(options: IRubberOptions) {
 
         // g
         // !!! #1: This will fail if options/windows/options_windows.yy does not exist.
-        await fse.copy(join(projectDir, "options/windows/options_windows.yy"), join(buildTempPath, "GMCache/PlatformOptions.json"));
+        if (await fse.pathExists(join(projectDir, "options/windows/options_windows.yy"))) {
+            await fse.copy(join(projectDir, "options/windows/options_windows.yy"), join(buildTempPath, "GMCache/PlatformOptions.json"));
+        } else {
+            // Write one manually
+            throw new Error("Missing WindowsOptions: options/windows/options_windows.yy")
+            // await fse.writeFile(join(buildTempPath, "GMCache/PlatformOptions.json"), JSON);
+        }
 
         emitter.emit("compileStatus", "Running IGOR\n");
         const exportType = options.build == "test" ? "Run" : (options.build === "zip" ? "PackageZip" : "PackageNsis")
