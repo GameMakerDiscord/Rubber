@@ -6,8 +6,9 @@ import { getUserDir, readLocalSetting } from "./utils/preferences_grab";
 import { inheritYYFile } from "./utils/yy_inherit";
 import { spawn } from "child_process";
 import { RubberEventEmitter } from "./rubber-events";
-import { IRuntimeIndex, IBuildMeta, IBuildSteamOptions, IBuildPreferences, IBuildTargetOptions } from "./build-typings";
+import { IRuntimeIndex, IBuildMeta, IBuildSteamOptions, IBuildPreferences, IBuildTargetOptions, IWindowsOptions } from "./build-typings";
 import { EventEmitter } from "events";
+import { uuid } from "./utils/uuid";
 
 // TODO: PLATFORM INCOMPATIBILITY
 const tempFolder = process.env.TEMP;
@@ -256,14 +257,51 @@ export function windows(options: IRubberOptions) {
             join(runtimeLocation, "/BaseProject/options/main/options_main.yy"),
             join(buildTempPath, "GMCache/MainOptions.json"));
 
-        // g
-        // !!! #1: This will fail if options/windows/options_windows.yy does not exist.
+        // g.
         if (await fse.pathExists(join(projectDir, "options/windows/options_windows.yy"))) {
             await fse.copy(join(projectDir, "options/windows/options_windows.yy"), join(buildTempPath, "GMCache/PlatformOptions.json"));
         } else {
             // Write one manually
-            throw new Error("Missing WindowsOptions: options/windows/options_windows.yy")
-            // await fse.writeFile(join(buildTempPath, "GMCache/PlatformOptions.json"), JSON);
+            // !!! I hate doing this i would really want to like find a copy already in the runtime.
+            const windows_options: IWindowsOptions = {
+                id: uuid(),
+                modelName: "GMWindowsOptions",
+                mvc: "1.0",
+                name: "Windows",
+                option_windows_allow_fullscreen_switching: false,
+                option_windows_borderless: false,
+                option_windows_company_info: "YoYo Games Ltd",
+                option_windows_copy_exe_to_dest: false,
+                option_windows_copyright_info: "(c) 2018 CompanyName",
+                option_windows_description_info: "A GameMaker Studio 2 Game",
+                option_windows_display_cursor: true,
+                option_windows_display_name: "Made in GameMaker Studio 2",
+                option_windows_enable_steam: false,
+                option_windows_executable_name: "${project_name}",
+                option_windows_icon: "${base_options_dir}\\windows\\icons\\icon.ico",
+                option_windows_installer_finished: "${base_options_dir}\\windows\\installer\\finished.bmp",
+                option_windows_installer_header: "${base_options_dir}\\windows\\installer\\header.bmp",
+                option_windows_interpolate_pixels: false,
+                option_windows_license: "${base_options_dir}\\windows\\installer\\license.txt",
+                option_windows_nsis_file: "${base_options_dir}\\windows\\installer\\nsis_script.nsi",
+                option_windows_product_info: "Made in GameMaker Studio 2",
+                option_windows_resize_window: false,
+                option_windows_save_location: 0,
+                option_windows_scale: 0,
+                option_windows_sleep_margin: 10,
+                option_windows_splash_screen: "${base_options_dir}\\windows\\splash\\splash.png",
+                option_windows_start_fullscreen: false,
+                option_windows_texture_page: "2048x2048",
+                option_windows_use_splash: false,
+                option_windows_version: {
+                    build: 0,
+                    major: 1,
+                    minor: 0,
+                    revision: 0
+                },
+                option_windows_vsync: false
+            }
+            await fse.writeFile(join(buildTempPath, "GMCache/PlatformOptions.json"), JSON.stringify(windows_options));
         }
 
         emitter.emit("compileStatus", "Running IGOR\n");
