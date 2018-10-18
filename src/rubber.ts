@@ -55,7 +55,6 @@ export interface IRubberOptions {
 /**
  * @param projectFile Path to the .yyp project
  * @param options Object containing build information.
- * @throws If any error happens
  */
 export function compile(options: IRubberOptions) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
@@ -103,8 +102,7 @@ export function compile(options: IRubberOptions) {
         if (!guid_match) {
             throw new Error("options_main.inherited.yy is missing project GUID, cannot identify project.");
         }
-        const guid = guid_match[0];
-        console.log("guid == " + guid);
+        const guid = guid_match[1];
         
         const buildTempPath = join(tempFolder, "gamemaker-rubber", guid);
         let runtimeLocation = "";
@@ -375,8 +373,6 @@ export function compile(options: IRubberOptions) {
             if (code !== 0 || igorErrors.length > 0) {
                 throw new Error("IGOR Failed. Check compile log.");
             }
-            await fse.remove(buildTempPath);
-
             emitter.emit("allFinished");
         });
         //#endregion
