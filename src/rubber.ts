@@ -39,6 +39,17 @@ export interface IRubberOptions {
     gamemakerLocation?: string;
     /** Alternate GameMakerStudio2 ProgramData Directory */
     gamemakerDataLocation?: string;
+
+    platform: "windows" |
+        "mac" |
+        "linux" |
+        "ios" |
+        "android" |
+        "ps4" |
+        "xboxone" |
+        "switch" |
+        "html5" |
+        "uwp";
 }
 
 /**
@@ -46,21 +57,25 @@ export interface IRubberOptions {
  * @param options Object containing build information.
  * @throws If any error happens
  */
-export function windows(options: IRubberOptions) {
+export function compile(options: IRubberOptions) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
+
     // Build component for checking later.
     const component = "Windows";
     const componentBuild = "Windows.build_module";
     // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
+        // !!! Other platforms support
+        if(options.platform !== "windows") throw new Error("Cannot compile to platform '" + options.platform + "'");
+        
         //#region Get Project Data
         // Make sure some envirionment variables are set.
         if (tempFolder === undefined || appdataFolder === undefined) {
-            throw new Error("%temp% or %appdata% is missing in the environment variables. Error Code Rubber01");
+            throw new Error("%temp% and/or %appdata% is missing in the environment variables.");
         }
         if (process.env.username === undefined) {
-            throw new Error("%username% is missing in the environment variables. Error Code Rubber04");
+            throw new Error("%username% is missing in the environment variables.");
         }
 
         // Fill in some defaults
@@ -73,12 +88,25 @@ export function windows(options: IRubberOptions) {
         
         // Compile process starts now, emit the starting event.
         emitter.emit("compileStatus", "Starting Rubber\n");
+        
         // !!! #6 check if this exists
-        const buildTempPath = join(tempFolder, "rubber-build-" + Math.round(Math.random() * 99999));
         // Get some project path data.
         const projectDir = dirname(projectFile);
         const projectName = basename(projectFile).substring(0, basename(projectFile).length - extname(projectFile).length);
         
+        if (!(await fse.pathExists(join(projectDir, "options", "main", "inherited", "options_main.inherited.yy")))) {
+            throw new Error("Missing options_main.inherited.yy. This can be because of a partial project, or the usage of a differen parent project structure.")
+        }
+        const guid_match = (await fse.readFile(join(projectDir, "options", "main", "inherited", "options_main.inherited.yy")))
+            .toString()
+            .match('"option_gameguid": "(.*?)"');
+        if (!guid_match) {
+            throw new Error("options_main.inherited.yy is missing project GUID, cannot identify project.");
+        }
+        const guid = guid_match[0];
+        console.log("guid == " + guid);
+        
+        const buildTempPath = join(tempFolder, "gamemaker-rubber", guid);
         let runtimeLocation = "";
         if (options.runtimeLocation) {
             runtimeLocation = options.runtimeLocation;
@@ -90,17 +118,17 @@ export function windows(options: IRubberOptions) {
                 try {
                     runtimes = JSON.parse((await fse.readFile(runtimeIndexPath)).toString());
                 } catch(e) {
-                    throw new Error("Invalid GameMaker Studio 2 Runtime Index. Error Code Rubber03");
+                    throw new Error("Invalid GameMaker Studio 2 Runtime Index. Reinstall GameMaker.");
                 }
     
                 if (typeof runtimes.active !== "string") {
-                    throw new Error("Cannot Locate GameMaker Studio 2 Runtimes. Error Code Rubber02");
+                    throw new Error("GameMaker has no active runtime, start up GameMaker and compile a project first.");
                 }
     
                 runtimeLocation = runtimes[runtimes.active];
                 runtimeLocation = runtimeLocation.substring(0, runtimeLocation.indexOf("&"));
             } else {
-                throw new Error("Cannot Locate GameMaker Studio 2 Runtimes. Error Code Rubber02");
+                throw new Error("Cannot Locate GameMaker Studio 2 Runtimes. Either GameMaker is installed somewhere else, or is not been setup.");
             }
         }
 
@@ -109,7 +137,7 @@ export function windows(options: IRubberOptions) {
         const allowedComponents = (licensePlist.match(/<key>components<\/key>.*?\n.*?<string>(.*?)<\/string>/) as any)[1].split(";");
 
         if (!allowedComponents.includes(componentBuild)) {
-            throw new Error("LicenseError: The current profile does not own building of " + component);
+            throw new Error("You dont have the permission to build a GameMaker game for " + component + ". This happens if your logged in as someone else, or didnt buy the module.");
         }
         //#endregion
 
@@ -175,16 +203,16 @@ export function windows(options: IRubberOptions) {
             "UserProfileName": process.env.username,
             // END INPUTS
 
-            "dave.tempdir": buildTempPath,
-            "dave.gm_cache": "${dave.tempdir}\\GMCache",
-            "dave.gm_temp": "${dave.tempdir}\\GMTemp",
-            "dave.output": "${dave.tempdir}\\Output",
+            "custom.tempdir": buildTempPath,
+            "custom.gm_cache": "${custom.tempdir}\\GMCache",
+            "custom.gm_temp": "${custom.tempdir}\\GMTemp",
+            "custom.output": "${custom.tempdir}\\Output",
 
             "project_full_filename": "${project_dir}\\${project_name}.yyp",
             "options_dir": "${project_dir}\\options",
 
             "project_cache_directory_name": "GMCache",
-            "asset_compiler_cache_directory": "${dave.tempdir}",
+            "asset_compiler_cache_directory": "${custom.tempdir}",
 
             "project_dir_inherited_BaseProject": "${runtimeLocation}\\BaseProject",
             "project_full_inherited_BaseProject": "${runtimeLocation}\\BaseProject\\BaseProject.yyp",
@@ -193,7 +221,7 @@ export function windows(options: IRubberOptions) {
 
             "local_directory": "${ApplicationData}\\${program_dir_name}",
             "local_cache_directory": "${local_directory}\\Cache",
-            "temp_directory": "${dave.gm_temp}",
+            "temp_directory": "${custom.gm_temp}",
 
             "system_directory": "${CommonApplicationData}\\${program_dir_name}",
             "system_cache_directory": "${system_directory}\\Cache",
@@ -309,6 +337,9 @@ export function windows(options: IRubberOptions) {
         const igorArgs = ["-options=" + join(buildTempPath, "build.bff"), "--", "Windows", exportType];
         const igor = spawn(join(runtimeLocation, "bin", "Igor.exe"), igorArgs);
     
+        // !!! #8 todo: store errors here, emit at end.
+        const igorErrors: string[] = [];
+
         const lanchingGame = options.build == "test";
         let igorState: "igor" | "game" = "igor";
 
@@ -341,8 +372,8 @@ export function windows(options: IRubberOptions) {
             } else {
                 emitter.emit("gameFinished");
             }
-            if (code !== 0) {
-                throw new Error("IGOR Failed. Check compile log");
+            if (code !== 0 || igorErrors.length > 0) {
+                throw new Error("IGOR Failed. Check compile log.");
             }
             await fse.remove(buildTempPath);
 
@@ -359,4 +390,39 @@ export function windows(options: IRubberOptions) {
         });
     }, 0);
     return emitter;
+}
+
+interface IRubberWindowsOptions {
+    /** Path to the .yyp file, this can be relative or absolute */
+    projectPath: string;
+
+    /** Use YoYoCompiler instead of VM, default fase */
+    yyc?: boolean;
+    /** Set Debugger Port, default disable debugger */
+    debug?: number;
+    /** Enable Verbose on IGOR.exe, default false */
+    verbose?: boolean;
+
+    /** Set GameMaker configuration, default "default" */
+    config?: string;
+
+    /** Type of build to run. */
+    build: "test" | "zip" | "installer";
+    /** Output of the build, set "" if build="test" */
+    outputPath: string;
+
+    /** Alternate Runtime Location */
+    runtimeLocation?: string;
+    /** Alternate GameMakerStudio2 Install Directory */
+    gamemakerLocation?: string;
+    /** Alternate GameMakerStudio2 ProgramData Directory */
+    gamemakerDataLocation?: string;
+}
+
+/** Deprecated: Use compile(), Compiles a project. */
+export function windows(options: IRubberWindowsOptions) {
+    
+    // call compile() with platform set.
+    (options as IRubberOptions).platform = "windows";
+    return compile(options as IRubberOptions);
 }

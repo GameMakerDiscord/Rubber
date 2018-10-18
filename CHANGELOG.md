@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 2.1.0 - 2018-08-19
+- Renamed `windows()` to `compile()`, you provide what platform you want here. **note only windows works here**.
+- `windows({...})` still works but is deprecated and will be removed in 3.\*.\*
+- \[[Issue #1](https://github.com/GameMakerDiscord/Rubber/issues/1)\] Windows: Projects will compile if they are missing platform options.
+
 ## 2.0.4 - 2018-08-19
 - Checked if you actually own what you want to export to
 - Removed temporary folder after compiling
