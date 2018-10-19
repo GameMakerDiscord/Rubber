@@ -6,11 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-## 2.1.0 - 2018-08-19
+## 2.3.0 - 2018-08-18
+- \[[Issue #8](https://github.com/GameMakerDiscord/Rubber/issues/8) \] Error array returned
+- Error summary
+- Fix errors with certain events not going off at the right time
+
+## 2.2.0 - 2018-08-18
+- \[[Issue #6](https://github.com/GameMakerDiscord/Rubber/issues/6) \] Iterative Compiling, aka do not delete build files after a build. 
+
+## 2.1.0 - 2018-10-18
 - Renamed `windows()` to `compile()`, you provide what platform you want here. **note only windows works here**.
 - `windows({...})` still works but is deprecated and will be removed in 3.\*.\*
 - \[[Issue #1](https://github.com/GameMakerDiscord/Rubber/issues/1)\] Windows: Projects will compile if they are missing platform options.
-- \[[Issue #6](https://github.com/GameMakerDiscord/Rubber/issues/6) \] Iterative Compiling, aka do not delete build files after a build. 
 
 ## 2.0.4 - 2018-08-19
 - Checked if you actually own what you want to export to

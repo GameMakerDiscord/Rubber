@@ -342,13 +342,13 @@ export function compile(options: IRubberOptions) {
 
         igor.stdout.on('data', (data: Buffer) => {
             if (lanchingGame && data.toString().includes("Runner.exe  -game")) {
-                emitter.emit("compileFinished");
+                emitter.emit("compileFinished", igorErrors);
                 emitter.emit("gameStarted");
                 igorState = "game";
             }
             if (igorState == "igor") {
                 if (data.toString().toLowerCase().startsWith("error")) {
-                    // data = chalk.redBright(data);
+                    igorErrors.push(data.toString());
                 }
                 emitter.emit("compileStatus", data.toString())
             } else {
@@ -368,14 +368,15 @@ export function compile(options: IRubberOptions) {
     
         igor.on('close', async(code) => {
             if (!lanchingGame) {
-                emitter.emit("compileFinished");
+                emitter.emit("compileFinished", igorErrors);
             } else {
+                if (code !== 0) emitter.emit("compileFinished", igorErrors);
                 emitter.emit("gameFinished");
             }
             if (code !== 0 || igorErrors.length > 0) {
-                throw new Error("IGOR Failed. Check compile log.");
+                emitter.emit("error", new Error("IGOR Failed. Check compile log."));
             }
-            emitter.emit("allFinished");
+            emitter.emit("allFinished", igorErrors);
         });
         //#endregion
     }

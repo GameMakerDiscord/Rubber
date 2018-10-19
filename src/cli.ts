@@ -101,21 +101,36 @@ cli.main((args, options) => {
         config: options.config || "default",
         verbose: options.debug
     });
-    build.on("compileStatus", (data) => {
+    build.on("compileStatus", (data:string) => {
         // Errors will be marked in red
         if(data.toLowerCase().startsWith("error")) {
             data = chalk.redBright(data);
         }
         process.stdout.write(data);
     });
-    build.on("gameStatus", (data) => {
+    build.on("gameStatus", (data: string) => {
         process.stdout.write(data);
     });
     build.on("gameStarted", () => {
         // space out the compile log and the game log a bit.
         console.log("\n");
     });
+    let igorErrors = false;
+    build.on("compileFinished", (errors: string[]) => {
+        if(errors.length > 0) {
+            igorErrors = true;
+            console.log(chalk.redBright("Compile Errors:"));
+            errors.forEach(err => {
+                console.log("  " + chalk.redBright(err));
+            });
+        }
+    });
     build.on("allFinished", () => {
-        console.log(chalk.green("Compile Finished"));
+        if(!igorErrors)
+            console.log(chalk.green("Compile Finished"));
+    });
+    build.on("error", (error: any) => {
+        if (!igorErrors)
+            cli.fatal(error.message);
     });
 });

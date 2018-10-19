@@ -26,14 +26,14 @@ export interface IGameClosedStats {
 
 interface IRubberMessageMap {
     "compileStarted": [undefined, () => void];
-    "compileFinished": [undefined, () => void];
+    "compileFinished": [(string[]), (errors: (string[])) => void];
     "compileStatus": [string, (data: string) => void];
     "gameStarted": [undefined, () => void];
     "gameStatus": [string, (data: string) => void];
     "gameFinished": [undefined, () => void];
-    "allFinished": [undefined, () => void];
+    "allFinished": [(string[]), (errors: (string[])) => void];
     "rawStdout": [string, (data: string) => void];
-    "error": [Error, (error: string) => void];
+    "error": [Error, (error: Error) => void];
 }
 
 export class RubberEventEmitter extends EventEmitter {

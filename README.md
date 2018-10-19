@@ -78,7 +78,8 @@ like the standard output (shown above).
 Emitted when the compile process starts
 
 #### compileFinished
-Emitted when the **compile process is finished, the game might be launched at this point**.
+Emitted when the **compile process is finished, the game might be launched at this point**. Sends an array of
+all errors in the compile process.
 
 #### compileStatus
 Emitted with a `data` paramater, containing a string of output data. When displaying this data
@@ -94,7 +95,8 @@ Emitted with a `data` paramater, containing a string of output data from the gam
 Emitted when the game closes, not always emitted.
 
 #### allFinished
-Emitted when everything is finished, always emitted at the end.
+Emitted when everything is finished, always emitted at the end. Sends an array of
+all errors in the compile process, exactly the same array as from the compileFinished message.
 
 #### rawStdout
 Emitted with a `data` paramater, containing a chunk of raw output data from IGOR.
