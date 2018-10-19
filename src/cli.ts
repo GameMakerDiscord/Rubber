@@ -34,6 +34,7 @@ const options = cli.parse({
     yyc: ["y", "Compiles with YYC"],
     config: ["c", "Sets the configuration", "string"],
     version: ["v", "Display the current version"],
+    clear: ["", "Clears cache for project and exits."]
 });
 // CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
@@ -71,6 +72,14 @@ cli.main((args, options) => {
         cli.fatal("Project invalid, or in a newer format. Exiting");
     }
 
+    // Clear cache option
+    if(options.clear) {
+        rubber.clearCache(path).then(() => {
+            cli.info("Cleared Project Cache.");
+        });
+        return;
+    }
+
     // We have a probably valid project. Time to pass it to rubber
     let buildType: "test" | "zip" | "installer" = "test";
     if (options.zip && options.installer) {
@@ -93,6 +102,10 @@ cli.main((args, options) => {
         verbose: options.debug
     });
     build.on("compileStatus", (data) => {
+        // Errors will be marked in red
+        if(data.toLowerCase().startsWith("error")) {
+            data = chalk.redBright(data);
+        }
         process.stdout.write(data);
     });
     build.on("gameStatus", (data) => {

@@ -88,7 +88,6 @@ export function compile(options: IRubberOptions) {
         // Compile process starts now, emit the starting event.
         emitter.emit("compileStatus", "Starting Rubber\n");
         
-        // !!! #6 check if this exists
         // Get some project path data.
         const projectDir = dirname(projectFile);
         const projectName = basename(projectFile).substring(0, basename(projectFile).length - extname(projectFile).length);
@@ -348,6 +347,9 @@ export function compile(options: IRubberOptions) {
                 igorState = "game";
             }
             if (igorState == "igor") {
+                if (data.toString().toLowerCase().startsWith("error")) {
+                    // data = chalk.redBright(data);
+                }
                 emitter.emit("compileStatus", data.toString())
             } else {
                 emitter.emit("gameStatus", data.toString())
@@ -386,6 +388,27 @@ export function compile(options: IRubberOptions) {
         });
     }, 0);
     return emitter;
+}
+
+/** Cleans rubber's cache for the project. */
+export async function clearCache(projectPath: string) {
+    if (tempFolder === undefined) {
+        throw new Error("%temp% is missing in the environment variables.");
+    }
+    const projectDir = dirname(projectPath);
+    if (!(await fse.pathExists(join(projectDir, "options", "main", "inherited", "options_main.inherited.yy")))) {
+        throw new Error("Missing options_main.inherited.yy. This can be because of a partial project, or the usage of a differen parent project structure.")
+    }
+    const guid_match = (await fse.readFile(join(projectDir, "options", "main", "inherited", "options_main.inherited.yy")))
+        .toString()
+        .match('"option_gameguid": "(.*?)"');
+    if (!guid_match) {
+        throw new Error("options_main.inherited.yy is missing project GUID, cannot identify project.");
+    }
+    const guid = guid_match[1];
+
+    // delete the folder
+    await fse.remove(join(tempFolder, "gamemaker-rubber", guid));
 }
 
 interface IRubberWindowsOptions {
