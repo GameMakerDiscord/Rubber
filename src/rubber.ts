@@ -62,8 +62,8 @@ export function compile(options: IRubberOptions) {
     const platform = options.platform;
 
     // Build component for checking later.
-    let component = "Windows";
-    let componentBuild = "Windows.build_module";
+    let component = "";
+    let componentBuild = "";
     let defaultPackageKey = "Package";
     switch (platform){
         case "android":
@@ -88,7 +88,7 @@ export function compile(options: IRubberOptions) {
     // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
         // !!! Other platforms support
-        if(component === "Unsupported") throw new Error("Cannot compile to unsupported platform '" + options.platform + "'");
+        if(component === "Unsupported") throw new Error("Cannot compile to unsupported platform '" + platform + "'");
         
         //#region Get Project Data
         // Make sure some envirionment variables are set.
@@ -157,7 +157,7 @@ export function compile(options: IRubberOptions) {
         const allowedComponents = (licensePlist.match(/<key>components<\/key>.*?\n.*?<string>(.*?)<\/string>/) as any)[1].split(";");
 
         if (!allowedComponents.includes(componentBuild)) {
-            throw new Error("You dont have the permission to build a GameMaker game for " + component + ". This happens if your logged in as someone else, or didnt buy the module.");
+            throw new Error("You dont have the permission to build a GameMaker game for " + platform + ". This happens if your logged in as someone else, or didnt buy the module.");
         }
         //#endregion
 
