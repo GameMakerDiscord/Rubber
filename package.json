@@ -1,7 +1,7 @@
 {
 	"name": "gamemaker-rubber",
-	"version": "2.3.0",
-	"description": "",
+	"version": "2.4.0",
+	"description": "GMS2 project compilation",
 	"main": "out/rubber.js",
 	"dependencies": {
 		"chalk": "^2.4.1",

@@ -180,11 +180,13 @@ export function compile(options: IRubberOptions) {
         /* There are 7 Files we need to create:
             * a. build.bff
             * b. macros.json
-            * c. preferences.json
-            * d. steam_options.yy (json)
+            * *c. preferences.json
+            * *d. steam_options.yy (json)
             * e. targetoptions.json
-            * f. MainOptions.json
-            * g. PlatformOptions.json
+            * *f. MainOptions.json
+            * *g. PlatformOptions.json
+            * 
+            * Marked with * were found unnecessary by #9
             */
     
         emitter.emit("compileStatus", "Creating Build Data\n");
@@ -300,7 +302,7 @@ export function compile(options: IRubberOptions) {
 
         // e.
         const targetoptions: IBuildTargetOptions = {
-            /** Placeholder: Need users to define a json file to specify what host device/remote client they want to use, and the read the configs from that file */
+            // !!! Placeholder: Need users to define a json file to specify what host device/remote client they want to use, and the read the configs from that file.
             runtime: options.yyc ? "YYC" : "VM",
             displayname: "",
             productType: "",
@@ -314,7 +316,7 @@ export function compile(options: IRubberOptions) {
             target_ip: "",
             username: "",
             encrypted_password: "",
-            install_dir: ""            
+            install_dir: ""
         };
         await fse.writeFile(join(buildTempPath, "targetoptions.json"), JSON.stringify(targetoptions));
     
