@@ -74,18 +74,21 @@ export function compile(options: IRubberOptions) {
             component = "Switch";
             componentBuild = "switch.build_module";
             break;            
-        default:
+        case "windows":
             defaultPackageKey = "PackageZip";
             component = "Windows";
             componentBuild = "Windows.build_module";
-            break;            
+            break;
+        default:
+            component = "Unsupported";
+            break;                
     }
 
 
     // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
         // !!! Other platforms support
-        //if(options.platform !== "windows") throw new Error("Cannot compile to platform '" + options.platform + "'");
+        if(component === "Unsupported") throw new Error("Cannot compile to unsupported platform '" + options.platform + "'");
         
         //#region Get Project Data
         // Make sure some envirionment variables are set.
