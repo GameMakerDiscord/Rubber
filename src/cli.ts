@@ -97,7 +97,7 @@ cli.main((args, options) => {
     let gamemakerLocation: string = "";
     if (options["gms-dir"]){
         gamemakerLocation = options["gms-dir"];
-        console.log("install dir:"+gamemakerLocation);
+        cli.debug("install dir:"+gamemakerLocation);
     }
     // Use the api to compile the project.
     const build = rubber.windows({
