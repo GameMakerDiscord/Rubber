@@ -61,8 +61,23 @@ export interface IBuildPreferences {
     /** Location of Visual Studio's vcvars32.bat */
     visual_studio_path: string;
 }
+
 export interface IBuildTargetOptions {
+    /** Config for host device/remote client*/
     runtime: "VM" | "YYC";
+    displayname: string;
+    hostname: string;
+    username: string;
+    encrypted_password: string;
+    install_dir: string;
+    target_ip: string;
+    productType: string;
+    version: string;
+    device: string;
+    type: string;
+    hostmac: string;
+    deviceIP: string;
+    status: string;
 }
 // not 100% accurate but whatever.
 export interface IWindowsOptions {

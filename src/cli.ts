@@ -36,6 +36,7 @@ const options = cli.parse({
     version: ["v", "Display the current version"],
     clear: ["", "Clears cache for project and exits."],
     "gms-dir":["","Alternative GMS installation directory","path"],
+    "export-platform":["p","Export platform","string"]
 });
 // CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
@@ -97,17 +98,23 @@ cli.main((args, options) => {
     let gamemakerLocation: string = "";
     if (options["gms-dir"]){
         gamemakerLocation = options["gms-dir"];
-        cli.debug("install dir:"+gamemakerLocation);
     }
+
+    let platform: "windows" | "mac" | "linux" | "ios" | "android" | "ps4" | "xboxone" | "switch" | "html5" | "uwp" = "windows";
+    if (options["export-platform"]){
+        platform = options["export-platform"];
+    }
+
     // Use the api to compile the project.
-    const build = rubber.windows({
+    const build = rubber.compile({
         projectPath: path,
         build: buildType,
         outputPath: args[1] || "",
         yyc: options.yyc,
         config: options.config || "default",
         verbose: options.debug,
-        gamemakerLocation
+        gamemakerLocation,
+        platform
     });
     build.on("compileStatus", (data:string) => {
         // Errors will be marked in red

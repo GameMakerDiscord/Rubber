@@ -59,14 +59,36 @@ export interface IRubberOptions {
 export function compile(options: IRubberOptions) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
+    const platform = options.platform;
 
     // Build component for checking later.
-    const component = "Windows";
-    const componentBuild = "Windows.build_module";
+    let component = "";
+    let componentBuild = "";
+    let defaultPackageKey = "Package";
+    switch (platform){
+        case "android":
+            component = "Android";
+            componentBuild = "android.build_module";
+            break;
+        case "switch":
+            component = "Switch";
+            componentBuild = "switch.build_module";
+            break;            
+        case "windows":
+            defaultPackageKey = "PackageZip";
+            component = "Windows";
+            componentBuild = "Windows.build_module";
+            break;
+        default:
+            component = "Unsupported";
+            break;                
+    }
+
+
     // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
         // !!! Other platforms support
-        if(options.platform !== "windows") throw new Error("Cannot compile to platform '" + options.platform + "'");
+        if(component === "Unsupported") throw new Error("Cannot compile to unsupported platform '" + platform + "'");
         
         //#region Get Project Data
         // Make sure some envirionment variables are set.
@@ -135,7 +157,7 @@ export function compile(options: IRubberOptions) {
         const allowedComponents = (licensePlist.match(/<key>components<\/key>.*?\n.*?<string>(.*?)<\/string>/) as any)[1].split(";");
 
         if (!allowedComponents.includes(componentBuild)) {
-            throw new Error("You dont have the permission to build a GameMaker game for " + component + ". This happens if your logged in as someone else, or didnt buy the module.");
+            throw new Error("You dont have the permission to build a GameMaker game for " + platform + ". This happens if your logged in as someone else, or didnt buy the module.");
         }
         //#endregion
 
@@ -260,30 +282,51 @@ export function compile(options: IRubberOptions) {
         await fse.writeFile(join(buildTempPath, "macros.json"), JSON.stringify(macros));
 
         // c.
+        /*
         const preferences: IBuildPreferences = {
             default_packaging_choice: 2,
             visual_studio_path: await readLocalSetting("machine.Platform Settings.Windows.visual_studio_path"),
         };
         await fse.writeFile(join(buildTempPath, "preferences.json"), JSON.stringify(preferences));
+        */
 
         // d.
+        /*
         const steamOptions: IBuildSteamOptions = {
             steamsdk_path: await readLocalSetting("machine.Platform Settings.Steam.steamsdk_path"),
         };
         await fse.writeFile(join(buildTempPath, "steam_options.yy"), JSON.stringify(steamOptions));
-    
+        */
+
         // e.
         const targetoptions: IBuildTargetOptions = {
+            /** Placeholder: Need users to define a json file to specify what host device/remote client they want to use, and the read the configs from that file */
             runtime: options.yyc ? "YYC" : "VM",
+            displayname: "",
+            productType: "",
+            version: "",
+            device: "",
+            type: "",
+            status: "",
+            hostmac: "",
+            deviceIP: "",
+            hostname: "",
+            target_ip: "",
+            username: "",
+            encrypted_password: "",
+            install_dir: ""            
         };
         await fse.writeFile(join(buildTempPath, "targetoptions.json"), JSON.stringify(targetoptions));
     
         // f.
+        /*
         await inheritYYFile(join(projectDir, "options/main/inherited/options_main.inherited.yy"),
             join(runtimeLocation, "/BaseProject/options/main/options_main.yy"),
             join(buildTempPath, "GMCache/MainOptions.json"));
+        */
 
         // g.
+        /*
         if (await fse.pathExists(join(projectDir, "options/windows/options_windows.yy"))) {
             await fse.copy(join(projectDir, "options/windows/options_windows.yy"), join(buildTempPath, "GMCache/PlatformOptions.json"));
         } else {
@@ -329,10 +372,11 @@ export function compile(options: IRubberOptions) {
             }
             await fse.writeFile(join(buildTempPath, "GMCache/PlatformOptions.json"), JSON.stringify(windows_options));
         }
+        */
 
         emitter.emit("compileStatus", "Running IGOR\n");
-        const exportType = options.build == "test" ? "Run" : (options.build === "zip" ? "PackageZip" : "PackageNsis")
-        const igorArgs = ["-options=" + join(buildTempPath, "build.bff"), "--", "Windows", exportType];
+        const exportType = options.build == "test" ? "Run" : (options.build === "zip" ? defaultPackageKey : "PackageNsis")
+        const igorArgs = ["-options=" + join(buildTempPath, "build.bff"), "--", component, exportType];
         const igor = spawn(join(runtimeLocation, "bin", "Igor.exe"), igorArgs);
     
         // !!! #8 todo: store errors here, emit at end.
