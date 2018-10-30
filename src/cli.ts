@@ -98,6 +98,10 @@ cli.main((args, options) => {
     let gamemakerLocation: string = "";
     if (options["gms-dir"]){
         gamemakerLocation = options["gms-dir"];
+<<<<<<< HEAD
+=======
+        cli.debug("install dir:"+gamemakerLocation);
+>>>>>>> feature/alt-gms-dir
     }
 
     let platform: "windows" | "mac" | "linux" | "ios" | "android" | "ps4" | "xboxone" | "switch" | "html5" | "uwp" = "windows";
