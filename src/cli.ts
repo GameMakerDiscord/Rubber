@@ -34,7 +34,8 @@ const options = cli.parse({
     yyc: ["y", "Compiles with YYC"],
     config: ["c", "Sets the configuration", "string"],
     version: ["v", "Display the current version"],
-    clear: ["", "Clears cache for project and exits."]
+    clear: ["", "Clears cache for project and exits."],
+    "gms-dir":["","Alternative GMS installation directory","path"],
 });
 // CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
@@ -92,6 +93,12 @@ cli.main((args, options) => {
     if (options.installer) {
         buildType = "installer";
     }
+    
+    let gamemakerLocation: string = "";
+    if (options["gms-dir"]){
+        gamemakerLocation = options["gms-dir"];
+        cli.debug("install dir:"+gamemakerLocation);
+    }
     // Use the api to compile the project.
     const build = rubber.windows({
         projectPath: path,
@@ -99,7 +106,8 @@ cli.main((args, options) => {
         outputPath: args[1] || "",
         yyc: options.yyc,
         config: options.config || "default",
-        verbose: options.debug
+        verbose: options.debug,
+        gamemakerLocation
     });
     build.on("compileStatus", (data:string) => {
         // Errors will be marked in red

@@ -81,7 +81,8 @@ export function compile(options: IRubberOptions) {
         if (typeof options.gamemakerDataLocation === "undefined") {
             options.gamemakerDataLocation = "C:\\ProgramData\\GameMakerStudio2";
         }
-        if (typeof options.gamemakerLocation === "undefined") {
+
+        if (typeof options.gamemakerLocation === "undefined" || options.gamemakerLocation === ""){
             options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2";
         }
         
