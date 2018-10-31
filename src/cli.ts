@@ -36,7 +36,9 @@ const options = cli.parse({
     version: ["v", "Display the current version"],
     clear: ["", "Clears cache for project and exits."],
     "gms-dir":["","Alternative GMS installation directory","path"],
-    "export-platform":["p","Export platform","string"]
+    "export-platform":["p","Export platform","string"],
+    "device-config-dir":["","Target device config file directory", "path"],
+    "target-device-name":["","Target device name","string"]
 });
 // CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
@@ -95,10 +97,26 @@ cli.main((args, options) => {
         buildType = "installer";
     }
     
+    // Alternative GMS install dir
     let gamemakerLocation: string = "";
     if (options["gms-dir"]){
         gamemakerLocation = options["gms-dir"];
     }
+
+    /** 
+     * For non-Windows platform, target devices need to be provided
+     * Target device info are usually located at "C:\Users\xxx\AppData\Roaming\GameMakerStudio2\YoyoAccountName\devices.json", but I cannot figure out where to parse the YoyoAccountName, so I will let user define the path   
+    */
+    let deviceConfigFileLocation: string = "";
+    if (options["device-config-dir"]){
+        deviceConfigFileLocation = options["device-config-dir"];
+    }
+
+    // Choose a target device among the available devices. Will grab the first one if left empty
+    let targetDeviceName: string = "";
+    if (options["target-device-name"]){
+        targetDeviceName = options["target-device-name"];
+    }   
 
     let platform: "windows" | "mac" | "linux" | "ios" | "android" | "ps4" | "xboxone" | "switch" | "html5" | "uwp" = "windows";
     if (options["export-platform"]){
@@ -114,7 +132,9 @@ cli.main((args, options) => {
         config: options.config || "default",
         verbose: options.debug,
         gamemakerLocation,
-        platform
+        platform,
+        deviceConfigFileLocation,
+        targetDeviceName
     });
     build.on("compileStatus", (data:string) => {
         // Errors will be marked in red

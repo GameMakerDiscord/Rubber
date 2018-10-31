@@ -6,7 +6,7 @@ import { getUserDir, readLocalSetting } from "./utils/preferences_grab";
 import { inheritYYFile } from "./utils/yy_inherit";
 import { spawn } from "child_process";
 import { RubberEventEmitter } from "./rubber-events";
-import { IRuntimeIndex, IBuildMeta, IBuildSteamOptions, IBuildPreferences, IBuildTargetOptions, IWindowsOptions } from "./build-typings";
+import { IRuntimeIndex, IBuildMeta, IBuildSteamOptions, IBuildPreferences, IBuildTargetOptions, IWindowsOptions} from "./build-typings";
 import { EventEmitter } from "events";
 import { uuid } from "./utils/uuid";
 
@@ -40,6 +40,12 @@ export interface IRubberOptions {
     /** Alternate GameMakerStudio2 ProgramData Directory */
     gamemakerDataLocation?: string;
 
+    /** Target Device Config File Directory */
+    deviceConfigFileLocation?: string;
+
+    /** Target Device Name*/
+    targetDeviceName?: string;    
+
     platform: "windows" |
         "mac" |
         "linux" |
@@ -64,7 +70,12 @@ export function compile(options: IRubberOptions) {
     // Build component for checking later.
     let component = "";
     let componentBuild = "";
+    
+
+    // Find out what Igor.exe needs based on the platform
     let defaultPackageKey = "Package";
+    let requireRemoteClient = false;    
+    let packageOnly = false;
     switch (platform){
         case "android":
             component = "Android";
@@ -75,21 +86,47 @@ export function compile(options: IRubberOptions) {
             componentBuild = "switch.build_module";
             break;            
         case "windows":
+            //Windows uses a different key for Igor to build package
             defaultPackageKey = "PackageZip";
             component = "Windows";
             componentBuild = "Windows.build_module";
             break;
+        case "mac":
+            component = "Mac";
+            componentBuild = "Mac.build_module";
+            requireRemoteClient = true;
+            break;
+        case "ios":
+            // iOS can only support build package and the rest needs to be completed in XCode
+            component = "iOS";
+            componentBuild = "ios.build_module";
+            requireRemoteClient = true;
+            packageOnly = true;
+            break;
+        case "linux":
+            component = "Linux";
+            componentBuild = "Linux.build_module";
+            requireRemoteClient = true;
+            break;                                         
         default:
             component = "Unsupported";
             break;                
     }
 
+    //Check target device name against the target device config file later
+    let targetDeviceName = options.targetDeviceName ? options.targetDeviceName:"";
 
     // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
         // !!! Other platforms support
         if(component === "Unsupported") throw new Error("Cannot compile to unsupported platform '" + platform + "'");
+
+        // iOS can only support build package and the rest needs to be completed in XCode
+        if(packageOnly && options.build !== "zip") throw new Error("Can only build package for '" + platform + "'");
         
+        // only Windows supports installer
+        if(component !== "Windows" && options.build === "installer") throw new Error("Only Windows can build installer'");
+
         //#region Get Project Data
         // Make sure some envirionment variables are set.
         if (tempFolder === undefined || appdataFolder === undefined) {
@@ -107,6 +144,64 @@ export function compile(options: IRubberOptions) {
         if (typeof options.gamemakerLocation === "undefined" || options.gamemakerLocation === ""){
             options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2";
         }
+        else{
+            if(!(await fse.pathExists(options.gamemakerLocation))) {
+                throw new Error("The alternative GMS installation directory does not exist!");
+            }
+        }
+
+
+        let deviceConfig;
+        let targetOptionValues;
+        let iosHostMacValues;                    
+        if ((typeof options.deviceConfigFileLocation === "undefined" || options.deviceConfigFileLocation === "")){          
+            if (requireRemoteClient){
+                throw new Error("This platform requires a target device config file");
+            }
+        }
+        else if (!(await fse.pathExists(options.deviceConfigFileLocation))) {
+            throw new Error("The Target device config file does not exist!");
+        }
+        else{
+            try{
+                deviceConfig = (await fse.readJson(options.deviceConfigFileLocation));
+            }
+            catch(e){
+                throw new Error("Invalid Target device config file.");
+            }    
+
+            //Validate the Target Device Name or grab the first device if left empty
+            let devices;
+            switch (platform){
+                case "android":
+                    //Android is nested one layer more
+                    devices = deviceConfig[platform].Auto;
+                    break;
+                default:
+                    devices = deviceConfig[platform];
+                    break;                
+            }
+            
+            if (targetDeviceName === ""){
+                //If left empty, grab the first available device
+                targetDeviceName = Object.keys(devices)[0];
+            }
+            else{
+                if (!devices[targetDeviceName]){
+                    throw new Error("Cannot find target device name in the target device config file");
+                }
+            }
+
+            targetOptionValues = devices[targetDeviceName];
+            if (platform == "ios"){
+                // iOS requires the a host MacOS to build
+                iosHostMacValues = deviceConfig.mac[targetOptionValues.hostmac];
+                if (!iosHostMacValues){
+                    throw new Error("Building for iOS requires the host Mac info in the device config file");
+                }
+            }            
+        }             
+        
         
         // Compile process starts now, emit the starting event.
         emitter.emit("compileStatus", "Starting Rubber\n");
@@ -177,7 +272,7 @@ export function compile(options: IRubberOptions) {
         await fse.mkdirs(join(buildTempPath, "Output"));
     
         // 2.
-        /* There are 7 Files we need to create:
+        /* There are 3 Files we need to create:
             * a. build.bff
             * b. macros.json
             * *c. preferences.json
@@ -302,21 +397,24 @@ export function compile(options: IRubberOptions) {
 
         // e.
         const targetoptions: IBuildTargetOptions = {
-            // !!! Placeholder: Need users to define a json file to specify what host device/remote client they want to use, and the read the configs from that file.
+            /** 
+             * 1. If remote client is not required, only need to know if building for YYC or VM
+             * 2. If building for iOS, need to also read the config info from the host Mac
+            */
             runtime: options.yyc ? "YYC" : "VM",
-            displayname: "",
-            productType: "",
-            version: "",
-            device: "",
-            type: "",
-            status: "",
-            hostmac: "",
-            deviceIP: "",
-            hostname: "",
-            target_ip: "",
-            username: "",
-            encrypted_password: "",
-            install_dir: ""
+            displayname: requireRemoteClient && targetOptionValues.displayname ? targetOptionValues.displayname : "",
+            productType: requireRemoteClient && targetOptionValues.productType ? targetOptionValues.productType : "",
+            version: requireRemoteClient && targetOptionValues.version ? targetOptionValues.version : "",
+            device: requireRemoteClient && targetOptionValues.device ? targetOptionValues.device : "",
+            type: requireRemoteClient && targetOptionValues.type ? targetOptionValues.type : "",
+            status: requireRemoteClient && targetOptionValues.status ? targetOptionValues.status : "",
+            hostmac: requireRemoteClient && targetOptionValues.hostmac ? targetOptionValues.hostmac : "",
+            deviceIP: requireRemoteClient && targetOptionValues.deviceIP ? targetOptionValues.deviceIP : "",
+            target_ip: requireRemoteClient && targetOptionValues.target_ip ? targetOptionValues.target_ip : "",
+            hostname: platform === "ios" ? iosHostMacValues.hostname : (requireRemoteClient && targetOptionValues.hostname ? targetOptionValues.hostname : ""),            
+            username: platform === "ios" ? iosHostMacValues.username : (requireRemoteClient && targetOptionValues.username ? targetOptionValues.username : ""),
+            encrypted_password: platform === "ios" ? iosHostMacValues.encrypted_password : (requireRemoteClient && targetOptionValues.encrypted_password ? targetOptionValues.encrypted_password : ""),
+            install_dir: platform === "ios" ? iosHostMacValues.install_dir : (requireRemoteClient && targetOptionValues.install_dir ? targetOptionValues.install_dir : "")            
         };
         await fse.writeFile(join(buildTempPath, "targetoptions.json"), JSON.stringify(targetoptions));
     
