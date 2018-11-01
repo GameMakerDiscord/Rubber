@@ -107,7 +107,9 @@ cli.main((args, options) => {
 
     /** 
      * For non-Windows platform, target devices need to be provided
-     * Target device info are usually located at "C:\Users\xxx\AppData\Roaming\GameMakerStudio2\YoyoAccountName\devices.json", but I cannot figure out where to parse the YoyoAccountName, so I will let user define the path   
+     * !!! Target device info are usually located at "C:\Users\xxx\AppData\Roaming\GameMakerStudio2\YoyoAccountName\devices.json"
+     * YoyoAccountName needs to be parsed by looking into um.json file and combine the local-part of the user's email address and
+     * the userID. For now, we will just let user define that path
     */
     let deviceConfigFileLocation: string = "";
     if (options["device-config-dir"]){
