@@ -35,6 +35,10 @@ export interface IRubberOptions {
 
     /** Alternate Runtime Location */
     runtimeLocation?: string;
+
+    /** The Runtime to Use*/
+    theRuntime?: string;
+
     /** Alternate GameMakerStudio2 Install Directory */
     gamemakerLocation?: string;
     /** Alternate GameMakerStudio2 ProgramData Directory */
@@ -66,6 +70,9 @@ export function compile(options: IRubberOptions) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
     const platform = options.platform;
+
+    // Choose a specific runtime or use the active one if left blank
+    const theRuntime = options.theRuntime ? options.theRuntime : "";
 
     // Build component for checking later.
     let component = "";
@@ -114,7 +121,7 @@ export function compile(options: IRubberOptions) {
     }
 
     //Check target device name against the target device config file later
-    let targetDeviceName = options.targetDeviceName ? options.targetDeviceName:"";
+    let targetDeviceName = options.targetDeviceName ? options.targetDeviceName : "";
 
     // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
@@ -236,11 +243,21 @@ export function compile(options: IRubberOptions) {
                     throw new Error("Invalid GameMaker Studio 2 Runtime Index. Reinstall GameMaker.");
                 }
     
-                if (typeof runtimes.active !== "string") {
-                    throw new Error("GameMaker has no active runtime, start up GameMaker and compile a project first.");
+                if (theRuntime === ""){
+                    // Use the active runtime if user did not specify
+                    if (typeof runtimes.active !== "string") {
+                        throw new Error("GameMaker has no active runtime, start up GameMaker and compile a project first.");
+                    }                                        
+                    runtimeLocation = runtimes[runtimes.active];
                 }
-    
-                runtimeLocation = runtimes[runtimes.active];
+                else{
+                    if (runtimes[theRuntime]){
+                        runtimeLocation = runtimes[theRuntime];
+                    }
+                    else{
+                        throw new Error("Cannot find the chosen runtime. Make sure the input is correct and the runtime is downloaded.");                        
+                    }
+                }
                 runtimeLocation = runtimeLocation.substring(0, runtimeLocation.indexOf("&"));
             } else {
                 throw new Error("Cannot Locate GameMaker Studio 2 Runtimes. Either GameMaker is installed somewhere else, or is not been setup.");

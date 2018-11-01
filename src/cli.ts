@@ -38,7 +38,8 @@ const options = cli.parse({
     "gms-dir":["","Alternative GMS installation directory","path"],
     "export-platform":["p","Export platform","string"],
     "device-config-dir":["","Target device config file directory", "path"],
-    "target-device-name":["","Target device name","string"]
+    "target-device-name":["","Target device name","string"],
+    "runtime":["","The runtime to use","string"]
 });
 // CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
@@ -123,6 +124,11 @@ cli.main((args, options) => {
         platform = options["export-platform"];
     }
 
+    let theRuntime: string = "";
+    if (options["runtime"]){
+        theRuntime = options["runtime"];
+    }
+
     // Use the api to compile the project.
     const build = rubber.compile({
         projectPath: path,
@@ -134,7 +140,8 @@ cli.main((args, options) => {
         gamemakerLocation,
         platform,
         deviceConfigFileLocation,
-        targetDeviceName
+        targetDeviceName,
+        theRuntime
     });
     build.on("compileStatus", (data:string) => {
         // Errors will be marked in red
