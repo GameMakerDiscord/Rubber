@@ -39,7 +39,8 @@ const options = cli.parse({
     "export-platform":["p","Export platform","string"],
     "device-config-dir":["","Target device config file directory", "path"],
     "target-device-name":["","Target device name","string"],
-    "runtime":["","The runtime to use","string"]
+    "runtime":["","The runtime to use","string"],
+    "ea":["","Toggle whether to use Early Access version"]
 });
 // CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
@@ -141,7 +142,8 @@ cli.main((args, options) => {
         platform,
         deviceConfigFileLocation,
         targetDeviceName,
-        theRuntime
+        theRuntime,
+        ea: options.ea
     });
     build.on("compileStatus", (data:string) => {
         // Errors will be marked in red

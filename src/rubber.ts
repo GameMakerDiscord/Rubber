@@ -18,12 +18,14 @@ export interface IRubberOptions {
     /** Path to the .yyp file, this can be relative or absolute */
     projectPath: string;
 
-    /** Use YoYoCompiler instead of VM, default fase */
+    /** Use YoYoCompiler instead of VM, default false */
     yyc?: boolean;
     /** Set Debugger Port, default disable debugger */
     debug?: number;
     /** Enable Verbose on IGOR.exe, default false */
     verbose?: boolean;
+    /** Toggle whether to use the EA version */
+    ea?:boolean;
 
     /** Set GameMaker configuration, default "default" */
     config?: string;
@@ -145,11 +147,21 @@ export function compile(options: IRubberOptions) {
 
         // Fill in some defaults
         if (typeof options.gamemakerDataLocation === "undefined") {
-            options.gamemakerDataLocation = "C:\\ProgramData\\GameMakerStudio2";
+            if (options.ea){
+                options.gamemakerDataLocation = "C:\\ProgramData\\GameMakerStudio2-EA";
+            }
+            else{
+                options.gamemakerDataLocation = "C:\\ProgramData\\GameMakerStudio2";
+            }
         }
 
         if (typeof options.gamemakerLocation === "undefined" || options.gamemakerLocation === ""){
-            options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2";
+            if (options.ea){
+                options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2-EA";
+            }
+            else{
+                options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2";
+            }            
         }
         else{
             if(!(await fse.pathExists(options.gamemakerLocation))) {
@@ -304,7 +316,7 @@ export function compile(options: IRubberOptions) {
         emitter.emit("compileStatus", "Creating Build Data\n");
         // a.
         const buildMeta: IBuildMeta = {
-            applicationPath: join(options.gamemakerLocation, "GameMakerStudio.exe"),
+            applicationPath: join(options.gamemakerLocation, options.ea ? "GameMakerStudio-EA.exe" : "GameMakerStudio.exe"),
             assetCompiler: "",
             compile_output_file_name: join(buildTempPath, "Output", projectName + ".win"),
             config: (options.config) ? options.config : "default",
@@ -375,9 +387,10 @@ export function compile(options: IRubberOptions) {
             "keytool_exe_path": "bin\\keytool.exe",
             "openssl_exe_path": "bin\\openssl.exe",
 
-            "program_dir_name": "GameMakerStudio2",
-            "program_name": "GameMakerStudio2",
-            "program_name_pretty": "GameMaker Studio 2",
+            "GMS_name": options.ea ? "GameMakerStudio2" : "GameMakerStudio2-EA",
+            "program_dir_name": "${GMS_name}",
+            "program_name": "${GMS_name}",
+            "program_name_pretty": "${GMS_name}",
 
             "default_font": "Open Sans",
             "default_style": "Regular",
@@ -391,7 +404,7 @@ export function compile(options: IRubberOptions) {
             "CommonProgramFilesX86": "C:\\Program Files (x86)\\Common Files",
             "UserProfile": "C:\\Users\\${UserProfileName}",
             "TempPath": "${UserProfile}\\AppData\\Local",
-            "exe_path": "${ProgramFiles}\\GameMaker Studio 2",
+            "exe_path": options.ea ? "${ProgramFiles}\\GameMaker Studio 2" : "${ProgramFiles}\\GameMaker Studio 2-EA",
         }
         await fse.writeFile(join(buildTempPath, "macros.json"), JSON.stringify(macros));
 
