@@ -586,38 +586,3 @@ export async function clearCache(projectPath: string) {
     // delete the folder
     await fse.remove(join(tempFolder, "gamemaker-rubber", guid));
 }
-
-interface IRubberWindowsOptions {
-    /** Path to the .yyp file, this can be relative or absolute */
-    projectPath: string;
-
-    /** Use YoYoCompiler instead of VM, default fase */
-    yyc?: boolean;
-    /** Set Debugger Port, default disable debugger */
-    debug?: number;
-    /** Enable Verbose on IGOR.exe, default false */
-    verbose?: boolean;
-
-    /** Set GameMaker configuration, default "default" */
-    config?: string;
-
-    /** Type of build to run. */
-    build: "test" | "zip" | "installer";
-    /** Output of the build, set "" if build="test" */
-    outputPath: string;
-
-    /** Alternate Runtime Location */
-    runtimeLocation?: string;
-    /** Alternate GameMakerStudio2 Install Directory */
-    gamemakerLocation?: string;
-    /** Alternate GameMakerStudio2 ProgramData Directory */
-    gamemakerDataLocation?: string;
-}
-
-/** Deprecated: Use compile(), Compiles a project. */
-export function windows(options: IRubberWindowsOptions) {
-    
-    // call compile() with platform set.
-    (options as IRubberOptions).platform = "windows";
-    return compile(options as IRubberOptions);
-}

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 3.0.0 - 2018-11-02
+- **BREAKING CHANGE** - Removed `.windows(...)`, use `.compile()` instead as you can access more platforms.
+
 ## 2.5.0 - 2018-11-02
 - Added iOS, Mac, Linux, Android, and Nintendo Switch exports.
 - More CLI Options
