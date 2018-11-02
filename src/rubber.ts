@@ -18,12 +18,14 @@ export interface IRubberOptions {
     /** Path to the .yyp file, this can be relative or absolute */
     projectPath: string;
 
-    /** Use YoYoCompiler instead of VM, default fase */
+    /** Use YoYoCompiler instead of VM, default false */
     yyc?: boolean;
     /** Set Debugger Port, default disable debugger */
     debug?: number;
     /** Enable Verbose on IGOR.exe, default false */
     verbose?: boolean;
+    /** Toggle whether to use the EA version */
+    ea?:boolean;
 
     /** Set GameMaker configuration, default "default" */
     config?: string;
@@ -35,6 +37,10 @@ export interface IRubberOptions {
 
     /** Alternate Runtime Location */
     runtimeLocation?: string;
+
+    /** The Runtime to Use*/
+    theRuntime?: string;
+
     /** Alternate GameMakerStudio2 Install Directory */
     gamemakerLocation?: string;
     /** Alternate GameMakerStudio2 ProgramData Directory */
@@ -66,6 +72,9 @@ export function compile(options: IRubberOptions) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
     const platform = options.platform;
+
+    // Choose a specific runtime or use the active one if left blank
+    const theRuntime = options.theRuntime ? options.theRuntime : "";
 
     // Build component for checking later.
     let component = "";
@@ -114,7 +123,7 @@ export function compile(options: IRubberOptions) {
     }
 
     //Check target device name against the target device config file later
-    let targetDeviceName = options.targetDeviceName ? options.targetDeviceName:"";
+    let targetDeviceName = options.targetDeviceName ? options.targetDeviceName : "";
 
     // We want to run stuff async with await, so this will be in its own function.
     const asyncRun = async() => {
@@ -138,11 +147,21 @@ export function compile(options: IRubberOptions) {
 
         // Fill in some defaults
         if (typeof options.gamemakerDataLocation === "undefined") {
-            options.gamemakerDataLocation = "C:\\ProgramData\\GameMakerStudio2";
+            if (options.ea){
+                options.gamemakerDataLocation = "C:\\ProgramData\\GameMakerStudio2-EA";
+            }
+            else{
+                options.gamemakerDataLocation = "C:\\ProgramData\\GameMakerStudio2";
+            }
         }
 
         if (typeof options.gamemakerLocation === "undefined" || options.gamemakerLocation === ""){
-            options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2";
+            if (options.ea){
+                options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2-EA";
+            }
+            else{
+                options.gamemakerLocation = "C:\\Program Files\\GameMaker Studio 2";
+            }            
         }
         else{
             if(!(await fse.pathExists(options.gamemakerLocation))) {
@@ -236,11 +255,21 @@ export function compile(options: IRubberOptions) {
                     throw new Error("Invalid GameMaker Studio 2 Runtime Index. Reinstall GameMaker.");
                 }
     
-                if (typeof runtimes.active !== "string") {
-                    throw new Error("GameMaker has no active runtime, start up GameMaker and compile a project first.");
+                if (theRuntime === ""){
+                    // Use the active runtime if user did not specify
+                    if (typeof runtimes.active !== "string") {
+                        throw new Error("GameMaker has no active runtime, start up GameMaker and compile a project first.");
+                    }                                        
+                    runtimeLocation = runtimes[runtimes.active];
                 }
-    
-                runtimeLocation = runtimes[runtimes.active];
+                else{
+                    if (runtimes[theRuntime]){
+                        runtimeLocation = runtimes[theRuntime];
+                    }
+                    else{
+                        throw new Error("Cannot find the chosen runtime. Make sure the input is correct and the runtime is downloaded.");                        
+                    }
+                }
                 runtimeLocation = runtimeLocation.substring(0, runtimeLocation.indexOf("&"));
             } else {
                 throw new Error("Cannot Locate GameMaker Studio 2 Runtimes. Either GameMaker is installed somewhere else, or is not been setup.");
@@ -287,7 +316,7 @@ export function compile(options: IRubberOptions) {
         emitter.emit("compileStatus", "Creating Build Data\n");
         // a.
         const buildMeta: IBuildMeta = {
-            applicationPath: join(options.gamemakerLocation, "GameMakerStudio.exe"),
+            applicationPath: join(options.gamemakerLocation, options.ea ? "GameMakerStudio-EA.exe" : "GameMakerStudio.exe"),
             assetCompiler: "",
             compile_output_file_name: join(buildTempPath, "Output", projectName + ".win"),
             config: (options.config) ? options.config : "default",
@@ -358,9 +387,10 @@ export function compile(options: IRubberOptions) {
             "keytool_exe_path": "bin\\keytool.exe",
             "openssl_exe_path": "bin\\openssl.exe",
 
-            "program_dir_name": "GameMakerStudio2",
-            "program_name": "GameMakerStudio2",
-            "program_name_pretty": "GameMaker Studio 2",
+            "GMS_name": options.ea ? "GameMakerStudio2" : "GameMakerStudio2-EA",
+            "program_dir_name": "${GMS_name}",
+            "program_name": "${GMS_name}",
+            "program_name_pretty": "${GMS_name}",
 
             "default_font": "Open Sans",
             "default_style": "Regular",
@@ -374,7 +404,7 @@ export function compile(options: IRubberOptions) {
             "CommonProgramFilesX86": "C:\\Program Files (x86)\\Common Files",
             "UserProfile": "C:\\Users\\${UserProfileName}",
             "TempPath": "${UserProfile}\\AppData\\Local",
-            "exe_path": "${ProgramFiles}\\GameMaker Studio 2",
+            "exe_path": options.ea ? "${ProgramFiles}\\GameMaker Studio 2" : "${ProgramFiles}\\GameMaker Studio 2-EA",
         }
         await fse.writeFile(join(buildTempPath, "macros.json"), JSON.stringify(macros));
 

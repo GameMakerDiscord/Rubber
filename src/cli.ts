@@ -38,7 +38,9 @@ const options = cli.parse({
     "gms-dir":["","Alternative GMS installation directory","path"],
     "export-platform":["p","Export platform","string"],
     "device-config-dir":["","Target device config file directory", "path"],
-    "target-device-name":["","Target device name","string"]
+    "target-device-name":["","Target device name","string"],
+    "runtime":["","The runtime to use","string"],
+    "ea":["","Toggle whether to use Early Access version"]
 });
 // CLI calls the callback with the arguments and options.
 cli.main((args, options) => {
@@ -105,7 +107,9 @@ cli.main((args, options) => {
 
     /** 
      * For non-Windows platform, target devices need to be provided
-     * Target device info are usually located at "C:\Users\xxx\AppData\Roaming\GameMakerStudio2\YoyoAccountName\devices.json", but I cannot figure out where to parse the YoyoAccountName, so I will let user define the path   
+     * !!! Target device info are usually located at "C:\Users\xxx\AppData\Roaming\GameMakerStudio2\YoyoAccountName\devices.json"
+     * YoyoAccountName needs to be parsed by looking into um.json file and combine the local-part of the user's email address and
+     * the userID. For now, we will just let user define that path
     */
     let deviceConfigFileLocation: string = "";
     if (options["device-config-dir"]){
@@ -123,6 +127,11 @@ cli.main((args, options) => {
         platform = options["export-platform"];
     }
 
+    let theRuntime: string = "";
+    if (options["runtime"]){
+        theRuntime = options["runtime"];
+    }
+
     // Use the api to compile the project.
     const build = rubber.compile({
         projectPath: path,
@@ -134,7 +143,9 @@ cli.main((args, options) => {
         gamemakerLocation,
         platform,
         deviceConfigFileLocation,
-        targetDeviceName
+        targetDeviceName,
+        theRuntime,
+        ea: options.ea
     });
     build.on("compileStatus", (data:string) => {
         // Errors will be marked in red
