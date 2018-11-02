@@ -3,6 +3,12 @@
 	"version": "2.4.0",
 	"description": "GMS2 project compilation",
 	"main": "out/rubber.js",
+	"scripts": {
+		"prepare": "./node_modules/typescript/bin/tsc"
+	},
+	"files":[
+		"/out"
+	],
 	"dependencies": {
 		"chalk": "^2.4.1",
 		"cli": "^1.0.1",
