@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-## 2.3.0 - 2018-08-18
+## 2.5.0 - 2018-11-02
+- Added iOS, Mac, Linux, Android, and Nintendo Switch exports.
+- More CLI Options
+
+## 2.3.0 - 2018-??-??
 - \[[Issue #8](https://github.com/GameMakerDiscord/Rubber/issues/8) \] Error array returned
 - Error summary
 - Fix errors with certain events not going off at the right time

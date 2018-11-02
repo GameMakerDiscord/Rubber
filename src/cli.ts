@@ -8,6 +8,7 @@ import { default as chalk } from "chalk";
 import { readFileSync, existsSync, statSync, readdirSync, PathLike } from "fs";
 import { join, resolve } from "path";
 import * as rubber from './rubber';
+import { getUserDir } from "./utils/preferences_grab";
 cli.setUsage("rubber [options] path/to/project.yyp [output file]");
 
 /**
@@ -43,7 +44,7 @@ const options = cli.parse({
     "ea":["","Toggle whether to use Early Access version"]
 });
 // CLI calls the callback with the arguments and options.
-cli.main((args, options) => {
+cli.main(async (args, options) => {
     if (options.version) {
         // Output version and if build tools are all set.
         const packagejson = JSON.parse(readFileSync(join(__dirname, "../package.json")).toString());
@@ -105,15 +106,11 @@ cli.main((args, options) => {
         gamemakerLocation = options["gms-dir"];
     }
 
-    /** 
-     * For non-Windows platform, target devices need to be provided
-     * !!! Target device info are usually located at "C:\Users\xxx\AppData\Roaming\GameMakerStudio2\YoyoAccountName\devices.json"
-     * YoyoAccountName needs to be parsed by looking into um.json file and combine the local-part of the user's email address and
-     * the userID. For now, we will just let user define that path
-    */
     let deviceConfigFileLocation: string = "";
     if (options["device-config-dir"]){
         deviceConfigFileLocation = options["device-config-dir"];
+    } else {
+        deviceConfigFileLocation = join(await getUserDir(), "devices.json");
     }
 
     // Choose a target device among the available devices. Will grab the first one if left empty
