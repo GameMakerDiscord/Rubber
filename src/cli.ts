@@ -109,8 +109,6 @@ cli.main(async (args, options) => {
     let deviceConfigFileLocation: string = "";
     if (options["device-config-dir"]){
         deviceConfigFileLocation = options["device-config-dir"];
-    } else {
-        deviceConfigFileLocation = join(await getUserDir(), "devices.json");
     }
 
     // Choose a target device among the available devices. Will grab the first one if left empty
