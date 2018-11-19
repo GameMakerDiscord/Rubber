@@ -418,12 +418,12 @@ export function compile(options: IRubberOptions) {
         */
 
         // d.
-        /*
+        
         const steamOptions: IBuildSteamOptions = {
             steamsdk_path: await readLocalSetting("machine.Platform Settings.Steam.steamsdk_path"),
         };
         await fse.writeFile(join(buildTempPath, "steam_options.yy"), JSON.stringify(steamOptions));
-        */
+        
 
         // e.
         const targetoptions: IBuildTargetOptions = {
