@@ -68,7 +68,8 @@ export interface IRubberOptions {
  * @param projectFile Path to the .yyp project
  * @param options Object containing build information.
  */
-export function compile(options: IRubberOptions) {
+
+export function compile(options: IRubberOptions, clearRemoteCache: boolean) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
     const platform = options.platform;
@@ -506,7 +507,7 @@ export function compile(options: IRubberOptions) {
 
         emitter.emit("compileStatus", "Running IGOR\n");
         const exportType = options.build == "test" ? "Run" : (options.build === "zip" ? defaultPackageKey : "PackageNsis")
-        const igorArgs = ["-options=" + join(buildTempPath, "build.bff"), "--", component, exportType];
+        const igorArgs = ["-options=" + join(buildTempPath, "build.bff"), "--", component, clearRemoteCache ? "Clean" : exportType];
         const igor = spawn(join(runtimeLocation, "bin", "Igor.exe"), igorArgs);
     
         // !!! #8 todo: store errors here, emit at end.
@@ -587,6 +588,12 @@ export async function clearCache(projectPath: string) {
     await fse.remove(join(tempFolder, "gamemaker-rubber", guid));
 }
 
+/** Use Igor's Clean function to clear remote client's cache */
+export function clearCacheRemote(options: IRubberOptions){
+    return compile(options, true);
+}
+
+
 interface IRubberWindowsOptions {
     /** Path to the .yyp file, this can be relative or absolute */
     projectPath: string;
@@ -619,5 +626,5 @@ export function windows(options: IRubberWindowsOptions) {
     
     // call compile() with platform set.
     (options as IRubberOptions).platform = "windows";
-    return compile(options as IRubberOptions);
+    return compile(options as IRubberOptions,false);
 }

@@ -35,6 +35,7 @@ const options = cli.parse({
     config: ["c", "Sets the configuration", "string"],
     version: ["v", "Display the current version"],
     clear: ["", "Clears cache for project and exits."],
+    "clear_remote": ["","Clears the remote client cache."],
     "gms-dir":["","Alternative GMS installation directory","path"],
     "export-platform":["p","Export platform","string"],
     "device-config-dir":["","Target device config file directory", "path"],
@@ -76,14 +77,6 @@ cli.main((args, options) => {
     
     if (!validateYYP(path)) {
         cli.fatal("Project invalid, or in a newer format. Exiting");
-    }
-
-    // Clear cache option
-    if(options.clear) {
-        rubber.clearCache(path).then(() => {
-            cli.info("Cleared Project Cache.");
-        });
-        return;
     }
 
     // We have a probably valid project. Time to pass it to rubber
@@ -132,8 +125,8 @@ cli.main((args, options) => {
         theRuntime = options["runtime"];
     }
 
-    // Use the api to compile the project.
-    const build = rubber.compile({
+    //
+    let rubberOptions = {
         projectPath: path,
         build: buildType,
         outputPath: args[1] || "",
@@ -146,7 +139,19 @@ cli.main((args, options) => {
         targetDeviceName,
         theRuntime,
         ea: options.ea
-    });
+    }
+
+    // Clear build machine's cache
+    if(options.clear) {
+        rubber.clearCache(path).then(() => {
+            cli.info("Cleared Project Cache.");
+        });
+        return;
+    }
+
+    // Use the api to compile the project or clear the remote client cache.
+    const build = options["clear_remote"] ? rubber.clearCacheRemote(rubberOptions) : rubber.compile(rubberOptions,false);
+
     build.on("compileStatus", (data:string) => {
         // Errors will be marked in red
         if(data.toLowerCase().startsWith("error")) {
