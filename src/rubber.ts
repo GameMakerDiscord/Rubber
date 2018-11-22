@@ -68,8 +68,7 @@ export interface IRubberOptions {
  * @param projectFile Path to the .yyp project
  * @param options Object containing build information.
  */
-
-export function compile(options: IRubberOptions, clearRemoteCache: boolean) {
+export function compile(options: IRubberOptions, clearRemoteCache: boolean = false) {
     const emitter = new EventEmitter() as RubberEventEmitter; // we dont need the overhead of a sub class
     const projectFile = resolve(options.projectPath);
     const platform = options.platform;
