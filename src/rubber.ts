@@ -581,7 +581,7 @@ export async function clearCache(projectPath: string) {
     if (!guid_match) {
         throw new Error("options_main.inherited.yy is missing project GUID, cannot identify project.");
     }
-    const guid = guid_match[1];
+    const guid = guid_match[1].replace("{", "").replace("}", "");
 
     // delete the folder
     await fse.remove(join(tempFolder, "gamemaker-rubber", guid));
