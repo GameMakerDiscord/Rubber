@@ -238,7 +238,7 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
         if (!guid_match) {
             throw new Error("options_main.inherited.yy is missing project GUID, cannot identify project.");
         }
-        const guid = guid_match[1];
+        const guid = guid_match[1].replace("{", "").replace("}", "");
         
         const buildTempPath = join(tempFolder, "gamemaker-rubber", guid);
         let runtimeLocation = "";
