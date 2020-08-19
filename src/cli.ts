@@ -17,7 +17,7 @@ cli.setUsage("rubber [options] path/to/project.yyp [output file]");
 function validateYYP(path: PathLike) {
     let projectRead;
     try {
-        projectRead = JSON.parse(readFileSync(path).toString().replaceAll(',}', '}');
+        projectRead = JSON.parse(readFileSync(path).toString().replaceAll(',}', '}'));
     } catch (e) {
         projectRead = {};
     }
