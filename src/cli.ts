@@ -21,11 +21,18 @@ function validateYYP(path: PathLike) {
     } catch (e) {
         projectRead = {};
     }
-    return ("IsDnDProject" in projectRead) &&
-        ("id" in projectRead) &&
-        ("mvc" in projectRead) &&
-        ("resources" in projectRead) &&
-        (projectRead.modelName === "GMProject");
+    return (("IsDnDProject" in projectRead) &&
+            ("id" in projectRead) &&
+            ("mvc" in projectRead) &&
+            ("resources" in projectRead) &&
+            (projectRead.modelName === "GMProject"))
+        ||
+           (("resources" in projectRead) &&
+            ("MetaData" in projectRead) &&
+            ("resourceVersion" in projectRead) &&
+            ("name" in projectRead) &&
+            ("tags" in projectRead) &&
+            (projectRead.resourceType === "GMProject"));
 }
 
 // Prepare CLI Options.
