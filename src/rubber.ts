@@ -85,14 +85,17 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
     let defaultPackageKey = "Package";
     let requireRemoteClient = false;    
     let packageOnly = false;
+    let targetMask = "64";
     switch (platform){
         case "android":
             component = "Android";
             componentBuild = "android.build_module";
+            targetMask = "8";
             break;
         case "switch":
             component = "Switch";
             componentBuild = "switch.build_module";
+            targetMask = "144115188075855872";
             break;            
         case "windows":
             //Windows uses a different key for Igor to build package
@@ -104,6 +107,7 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
             component = "Mac";
             componentBuild = "Mac.build_module";
             requireRemoteClient = true;
+            targetMask = "2";
             break;
         case "ios":
             // iOS can only support build package and the rest needs to be completed in XCode
@@ -111,15 +115,17 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
             componentBuild = "ios.build_module";
             requireRemoteClient = true;
             packageOnly = true;
+            targetMask = "4";
             break;
         case "linux":
             component = "Linux";
             componentBuild = "Linux.build_module";
             requireRemoteClient = true;
+            targetMask = "128";
             break;                                         
         default:
             component = "Unsupported";
-            break;                
+            break;               
     }
 
     //Check target device name against the target device config file later
@@ -332,7 +338,7 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
             runtimeLocation: runtimeLocation,
             steamOptions: join(buildTempPath, "steam_options.yy"),
             targetFile: options.outputPath,
-            targetMask: "64",
+            targetMask,
             targetOptions: join(buildTempPath, "targetoptions.json"),
             tempFolder: join(buildTempPath, "GMTemp"),
             useShaders: "True",
