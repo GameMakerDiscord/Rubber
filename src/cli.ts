@@ -17,15 +17,22 @@ cli.setUsage("rubber [options] path/to/project.yyp [output file]");
 function validateYYP(path: PathLike) {
     let projectRead;
     try {
-        projectRead = JSON.parse(readFileSync(path).toString());
+        projectRead = JSON.parse(readFileSync(path).toString().replace(/\,\s*\}/gi, "}").replace(/\,\s*\]/gi,"]"));
     } catch (e) {
         projectRead = {};
     }
-    return ("IsDnDProject" in projectRead) &&
-        ("id" in projectRead) &&
-        ("mvc" in projectRead) &&
-        ("resources" in projectRead) &&
-        (projectRead.modelName === "GMProject");
+    return (("IsDnDProject" in projectRead) &&
+            ("id" in projectRead) &&
+            ("mvc" in projectRead) &&
+            ("resources" in projectRead) &&
+            (projectRead.modelName === "GMProject"))
+        ||
+           (("resources" in projectRead) &&
+            ("MetaData" in projectRead) &&
+            ("resourceVersion" in projectRead) &&
+            ("name" in projectRead) &&
+            ("tags" in projectRead) &&
+            (projectRead.resourceType === "GMProject"));
 }
 
 // Prepare CLI Options.

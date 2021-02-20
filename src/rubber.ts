@@ -238,7 +238,7 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
         if (!guid_match) {
             throw new Error("options_main.inherited.yy is missing project GUID, cannot identify project.");
         }
-        const guid = guid_match[1];
+        const guid = guid_match[1].replace("{", "").replace("}", "");
         
         const buildTempPath = join(tempFolder, "gamemaker-rubber", guid);
         let runtimeLocation = "";
@@ -387,7 +387,7 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
             "keytool_exe_path": "bin\\keytool.exe",
             "openssl_exe_path": "bin\\openssl.exe",
 
-            "GMS_name": options.ea ? "GameMakerStudio2" : "GameMakerStudio2-EA",
+            "GMS_name": options.ea ? "GameMakerStudio2-EA" : "GameMakerStudio2",
             "program_dir_name": "${GMS_name}",
             "program_name": "${GMS_name}",
             "program_name_pretty": "${GMS_name}",
@@ -404,7 +404,7 @@ export function compile(options: IRubberOptions, clearRemoteCache: boolean = fal
             "CommonProgramFilesX86": "C:\\Program Files (x86)\\Common Files",
             "UserProfile": "C:\\Users\\${UserProfileName}",
             "TempPath": "${UserProfile}\\AppData\\Local",
-            "exe_path": options.ea ? "${ProgramFiles}\\GameMaker Studio 2" : "${ProgramFiles}\\GameMaker Studio 2-EA",
+            "exe_path": options.ea ? "${ProgramFiles}\\GameMaker Studio 2-EA" : "${ProgramFiles}\\GameMaker Studio 2",
         }
         await fse.writeFile(join(buildTempPath, "macros.json"), JSON.stringify(macros));
 
@@ -581,7 +581,7 @@ export async function clearCache(projectPath: string) {
     if (!guid_match) {
         throw new Error("options_main.inherited.yy is missing project GUID, cannot identify project.");
     }
-    const guid = guid_match[1];
+    const guid = guid_match[1].replace("{", "").replace("}", "");
 
     // delete the folder
     await fse.remove(join(tempFolder, "gamemaker-rubber", guid));
