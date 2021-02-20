@@ -7,7 +7,7 @@ there is an api that you can call from javascript. Running this program requires
 a valid GameMaker Studio 2 installation and have purchased the selected module (you cannot compile
 to Windows if you only own HTML Exporting)
 
-Maintained by: ImDaveead
+Maintained by: [dave caruso](https://github.com/davecaruso)
 
 ## Notes
 I would like some of these untested features to be confirmed to work or fail, so that it can be resolved.
